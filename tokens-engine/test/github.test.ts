@@ -7,9 +7,9 @@ const bloque = html.split('// GH:inicio')[1].split('// GH:fin')[0];
 const cargar = (fetchFalso: any) => new Function('fetch', `${bloque}; return { publicarGitHub, ghSlug, ghMensaje };`)(fetchFalso);
 
 type Llamada = { metodo: string; ruta: string; cuerpo?: any; auth?: string };
-function githubFalso(opts: { existe?: boolean; tokenValido?: boolean; etiquetaExiste?: boolean; pagesError?: number; sinPermiso?: boolean } = {}) {
+function githubFalso(opts: { existe?: boolean; tokenValido?: boolean; etiquetaExiste?: boolean; pagesError?: number; sinPermiso?: boolean; carrera?: boolean } = {}) {
   const llamadas: Llamada[] = [];
-  let creado = !!opts.existe, sondeos = 0, blobs = 0;
+  let creado = !!opts.existe, sondeos = 0, blobs = 0, patches = 0, cabeza = 'c0';
   const resp = (status: number, json: any) => ({ ok: status < 400, status, text: async () => (json === null ? '' : JSON.stringify(json)) });
   const f = async (url: string, init: any) => {
     const ruta = String(url).replace('https://api.github.com', '');
@@ -20,12 +20,12 @@ function githubFalso(opts: { existe?: boolean; tokenValido?: boolean; etiquetaEx
     if (ruta === '/user') return resp(200, { login: 'robmanuix' });
     if (metodo === 'GET' && ruta === '/repos/robmanuix/ds-flash') return creado ? resp(200, { default_branch: 'main', html_url: 'https://github.com/robmanuix/ds-flash' }) : resp(404, { message: 'Not Found' });
     if (metodo === 'POST' && ruta === '/repos/robmanuix/plantilla/generate') { if (opts.sinPermiso) return resp(403, { message: 'Resource not accessible' }); creado = true; return resp(201, {}); }
-    if (metodo === 'GET' && ruta === '/repos/robmanuix/ds-flash/git/ref/heads/main') { if (++sondeos < 2 && !opts.existe) return resp(409, { message: 'Git Repository is empty.' }); return resp(200, { object: { sha: 'c0' } }); }
-    if (metodo === 'GET' && ruta === '/repos/robmanuix/ds-flash/git/commits/c0') return resp(200, { tree: { sha: 't0' } });
+    if (metodo === 'GET' && ruta === '/repos/robmanuix/ds-flash/git/ref/heads/main') { if (++sondeos < 2 && !opts.existe) return resp(409, { message: 'Git Repository is empty.' }); return resp(200, { object: { sha: cabeza } }); }
+    if (metodo === 'GET' && /\/git\/commits\/c0b?$/.test(ruta)) return resp(200, { tree: { sha: 't0' } });
     if (metodo === 'POST' && ruta.endsWith('/git/blobs')) return resp(201, { sha: 'b' + ++blobs });
     if (metodo === 'POST' && ruta.endsWith('/git/trees')) return resp(201, { sha: 't1' });
     if (metodo === 'POST' && ruta.endsWith('/git/commits')) return resp(201, { sha: 'c1' });
-    if (metodo === 'PATCH' && ruta.endsWith('/git/refs/heads/main')) return resp(200, {});
+    if (metodo === 'PATCH' && ruta.endsWith('/git/refs/heads/main')) { if (opts.carrera && ++patches === 1) { cabeza = 'c0b'; return resp(422, { message: 'Update is not a fast forward' }); } return resp(200, {}); }
     if (metodo === 'POST' && ruta.endsWith('/git/refs')) return opts.etiquetaExiste ? resp(422, { message: 'Reference already exists' }) : resp(201, {});
     if (metodo === 'POST' && ruta.endsWith('/pages')) return opts.pagesError ? resp(opts.pagesError, { message: 'x' }) : resp(201, {});
     return resp(500, { message: 'ruta no simulada ' + metodo + ' ' + ruta });
@@ -39,6 +39,14 @@ const archivos = [
 const base = { token: 'ghp_x', owner: '', plantilla: 'robmanuix/plantilla', repo: 'ds-flash', privado: true, version: '1.1.0', espera: 0, archivos };
 
 describe('publicación en GitHub', () => {
+  it('si GitHub movió la rama mientras preparaba el repositorio, relee la cabeza y reintenta', async () => {
+    const g = githubFalso({ carrera: true }); const { publicarGitHub } = cargar(g.f);
+    const r = await publicarGitHub({ ...base });
+    const commits = g.llamadas.filter((l) => l.ruta.endsWith('/git/commits'));
+    expect(commits.map((c) => c.cuerpo.parents[0])).toEqual(['c0', 'c0b']);
+    expect(g.llamadas.filter((l) => l.ruta.endsWith('/git/blobs')).length).toBe(2);
+    expect(r.commit).toBe('c1');
+  });
   it('crea el repositorio desde la plantilla, sube todo en un commit y etiqueta', async () => {
     const g = githubFalso(); const { publicarGitHub } = cargar(g.f);
     const r = await publicarGitHub({ ...base });

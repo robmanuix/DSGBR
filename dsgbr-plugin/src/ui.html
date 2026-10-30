@@ -409,18 +409,28 @@
     }
     const rama = info.default_branch || 'main';
     const base = '/repos/' + owner + '/' + repo;
-    const ref = await ghLlamar(o.token, 'GET', base + '/git/ref/heads/' + rama);
-    const cabeza = ref.object.sha;
-    const commitBase = await ghLlamar(o.token, 'GET', base + '/git/commits/' + cabeza);
     let hechos = 0;
     const blobs = await ghEnParalelo(o.archivos, 4, async (a) => {
       const b = await ghLlamar(o.token, 'POST', base + '/git/blobs', { content: ghB64(a), encoding: 'base64' });
       prog('Subiendo archivos… ' + (++hechos) + '/' + o.archivos.length);
       return { path: a.ruta, mode: '100644', type: 'blob', sha: b.sha };
     });
-    const arbol = await ghLlamar(o.token, 'POST', base + '/git/trees', { base_tree: commitBase.tree.sha, tree: blobs });
-    const commit = await ghLlamar(o.token, 'POST', base + '/git/commits', { message: o.mensaje || ('DocSite v' + o.version), tree: arbol.sha, parents: [cabeza] });
-    await ghLlamar(o.token, 'PATCH', base + '/git/refs/heads/' + rama, { sha: commit.sha });
+    // Un repositorio recién creado desde la plantilla puede seguir cambiando unos segundos: se relee la cabeza de la rama y se reintenta si GitHub la movió.
+    if (creado) await esperar(o.espera === undefined ? 3000 : o.espera);
+    let commit = null;
+    for (let intento = 1; !commit; intento++) {
+      const ref = await ghLlamar(o.token, 'GET', base + '/git/ref/heads/' + rama);
+      const cabeza = ref.object.sha;
+      const commitBase = await ghLlamar(o.token, 'GET', base + '/git/commits/' + cabeza);
+      const arbol = await ghLlamar(o.token, 'POST', base + '/git/trees', { base_tree: commitBase.tree.sha, tree: blobs });
+      const nuevo = await ghLlamar(o.token, 'POST', base + '/git/commits', { message: o.mensaje || ('DocSite v' + o.version), tree: arbol.sha, parents: [cabeza] });
+      try { await ghLlamar(o.token, 'PATCH', base + '/git/refs/heads/' + rama, { sha: nuevo.sha }); commit = nuevo; }
+      catch (e) {
+        if (e.status !== 422 || intento >= 5) throw e;
+        prog('GitHub aún está preparando el repositorio, reintentando… (' + intento + '/4)');
+        await esperar(o.espera === undefined ? 3000 : o.espera);
+      }
+    }
     let etiqueta = 'v' + o.version;
     try { await ghLlamar(o.token, 'POST', base + '/git/refs', { ref: 'refs/tags/' + etiqueta, sha: commit.sha }); }
     catch (e) { if (e.status === 422) etiqueta = etiqueta + ' (ya existía; súbela de versión para una etiqueta nueva)'; else throw e; }
