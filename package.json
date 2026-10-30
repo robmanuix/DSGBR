@@ -1,0 +1,11 @@
+{
+  "name": "dsgbr",
+  "private": true,
+  "version": "0.1.0",
+  "description": "DSGBR — DS Generate by Robman Digital (monorepo de arranque)",
+  "workspaces": ["tokens-engine", "dsgbr-plugin"],
+  "scripts": {
+    "test": "npm test -w tokens-engine",
+    "build": "npm run build -w tokens-engine && npm run build -w dsgbr-plugin"
+  }
+}

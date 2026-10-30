@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Support us" section="support" pageTitle="Support us" pageDesc="Recursos, contribuciones y contacto del equipo de diseño.">
+
+  <div style="max-width:640px">
+    <div class="support-hero">
+      <div style="font-size:48px;margin-bottom:16px">🙌</div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:var(--txt-primary)">Gracias por usar el Sistema de Diseño</h2>
+      <p style="font-size:15px;color:var(--txt-secondary);line-height:1.6">
+        Este sistema fue construido para garantizar consistencia visual, accesibilidad y velocidad de desarrollo. Si encuentras algún problema o quieres contribuir, estos son los canales disponibles.
+      </p>
+    </div>
+
+    <p class="section-label">Recursos</p>
+    <div class="resource-list">
+      <div class="resource-item">
+        <div class="resource-icon" style="background:#f3f0ff">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="2" stroke="#7c3aed" stroke-width="1.5"/><path d="M6 7H14M6 10H11" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="resource-title">Archivo Figma</div>
+          <div class="resource-desc">Accede al archivo maestro del Design System con todos los tokens, componentes y referencias.</div>
+          <code class="resource-code">LhZrYVa1Sc4tJPDMUNN6Nu</code>
+        </div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-icon" style="background:#f0fdf4">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="#16803d" stroke-width="1.5"/><path d="M10 6V10L13 13" stroke="#16803d" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="resource-title">Versión actual</div>
+          <div class="resource-desc">Sistema de Diseño v1.0.0 · Auditado 2026-05-16 · Compatible con WCAG AA.</div>
+        </div>
+      </div>
+      <div class="resource-item">
+        <div class="resource-icon" style="background:#fff7ed">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.6L18 8.4L14 12.3L15 18L10 15.3L5 18L6 12.3L2 8.4L7.6 7.6L10 2Z" stroke="#ea580c" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="resource-title">Contribuciones</div>
+          <div class="resource-desc">Para proponer cambios, nuevos componentes o correcciones, abre un issue en el repositorio del proyecto.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-top:40px">Estado del sistema</p>
+    <table class="ds-table">
+      <tbody>
+        <tr><td style="font-weight:600;width:180px">WCAG Compliance</td><td><span class="tag tag-primary">AA ✓</span></td></tr>
+        <tr><td style="font-weight:600">Modos de color</td><td>☀️ Claro · 🌑 Oscuro</td></tr>
+        <tr><td style="font-weight:600">Fuentes</td><td>Playfair Display · Inter (Google Fonts)</td></tr>
+        <tr><td style="font-weight:600">Última auditoría</td><td>2026-05-16 · 3 issues corregidos</td></tr>
+        <tr><td style="font-weight:600">Componentes</td><td>8 dinámicos · 261 variantes · 1905 iconos</td></tr>
+      </tbody>
+    </table>
+  </div>
+</Layout>
+
+<style>
+  .support-hero { background: var(--prim-100); border-radius: var(--r-lg); padding: 32px; margin-bottom: 32px; text-align: center; }
+  .resource-list { display: flex; flex-direction: column; gap: 12px; }
+  .resource-item { display: flex; gap: 16px; background: #fff; border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; box-shadow: var(--shadow-low); align-items: flex-start; }
+  .resource-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .resource-title { font-size: 15px; font-weight: 600; color: var(--txt-primary); margin-bottom: 4px; }
+  .resource-desc { font-size: 13px; color: var(--txt-secondary); line-height: 1.5; }
+  .resource-code { display: inline-block; margin-top: 8px; font-size: 12px; background: var(--neutral-100); padding: 3px 8px; border-radius: var(--r-sm); font-family: 'Courier New', monospace; color: var(--txt-secondary); }
+</style>

@@ -1,0 +1,45 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { todos, resolver, texto } from '../../lib/tokens';
+const subNav = [
+  { label: 'Colores',       href: '/tokens/colors',        id: 'colors' },
+  { label: 'Tipografía',    href: '/tokens/typography',    id: 'typography' },
+  { label: 'Espaciado',     href: '/tokens/spacing',       id: 'spacing' },
+  { label: 'Border Radius', href: '/tokens/border-radius', id: 'border-radius' },
+  { label: 'Elevaciones',   href: '/tokens/elevations',    id: 'elevations' },
+  { label: 'Variables',     href: '/tokens/variables',     id: 'variables' },
+  { label: 'Descargas',     href: '/tokens/descargas',     id: 'descargas' },
+];
+const filas = todos.map((t) => ({ t, v: texto(resolver(t, t.modoBase)) }));
+---
+<Layout title="Variables" section="tokens" subNav={subNav} pageTitle="Variables" pageDesc={`${todos.length} variables de Figma y su nombre en cada plataforma.`}>
+  <div class="search-bar">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#9ea3ab" stroke-width="1.4"/><path d="M10 10L12.5 12.5" stroke="#9ea3ab" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <input id="search" type="text" placeholder="Buscar variable..." />
+  </div>
+  <div class="var-list">
+    {filas.map(({ t, v }) => (
+      <div class="var-row" data-searchable={`${t.coleccion} ${t.nombre}`}>
+        <div class="var-main">
+          {v.startsWith('#') && <span class="var-sw" style={`background:${v}`}></span>}
+          <div><div class="token-name">{t.nombre}</div><div class="var-col">{t.coleccion}</div></div>
+        </div>
+        <span class="token-value">{v}</span>
+        <div class="var-actions">
+          {t.codeSyntax?.WEB && <button class="copy-btn" data-copy={t.codeSyntax.WEB}>Web</button>}
+          {t.codeSyntax?.iOS && <button class="copy-btn" data-copy={t.codeSyntax.iOS}>iOS</button>}
+          {t.codeSyntax?.ANDROID && <button class="copy-btn" data-copy={t.codeSyntax.ANDROID}>Android</button>}
+        </div>
+      </div>
+    ))}
+  </div>
+</Layout>
+<style is:global>
+  .var-list { display: flex; flex-direction: column; gap: 6px; }
+  .var-row { background: #fff; border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 16px; display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 16px; align-items: center; box-shadow: var(--shadow-low); }
+  .var-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .var-sw { width: 24px; height: 24px; border-radius: var(--r-sm); border: 1px solid var(--border); flex-shrink: 0; }
+  .var-col { font-size: 12px; color: var(--txt-tertiary); }
+  .var-actions { display: flex; gap: 6px; }
+  @media (max-width: 760px) { .var-row { grid-template-columns: 1fr; } }
+</style>

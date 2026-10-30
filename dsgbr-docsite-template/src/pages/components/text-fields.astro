@@ -1,0 +1,310 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',      id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',  id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',   id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',      href: '/components/figma',        id: 'figma' },
+];
+
+const icons = [
+  { key: 'search',   title: 'Buscar',    svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'mail',     title: 'Correo',    svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M1.5 5L8 9.5L14.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'user',     title: 'Usuario',   svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 13.5C2.5 11 5 9 8 9S13.5 11 13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'lock',     title: 'Contraseña',svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5C5 3.34 6.34 2 8 2S11 3.34 11 5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'eye',      title: 'Ver',       svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8C1.5 8 3.5 3.5 8 3.5S14.5 8 14.5 8 12.5 12.5 8 12.5 1.5 8 1.5 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/></svg>' },
+  { key: 'calendar', title: 'Fecha',     svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 1.5V4.5M11 1.5V4.5M2 7H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'phone',    title: 'Teléfono',  svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5.5 2H3.5C2.67 2 2 2.67 2 3.5C2 9.85 6.15 14 12.5 14C13.33 14 14 13.33 14 12.5V10.5L11.5 9.5L10 11C9 10.5 5.5 7 5 6L6.5 4.5L5.5 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+];
+
+const cssCode = `.field { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 13px; font-weight: 500; color: var(--color-content-secondary); }
+.field-wrap { position: relative; }
+.field-input {
+  width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
+  color: var(--color-content-primary); background: var(--color-background-primary); border: 1.5px solid var(--color-border-secondary);
+  border-radius: 8px; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field-input::placeholder { color: var(--color-content-disabled); }
+.field-input:focus { border-color: var(--color-brand-500); box-shadow: 0 0 0 3px rgba(81,163,163,.15); }
+.field-input:disabled { background: var(--color-background-hover); color: var(--color-content-disabled); cursor: not-allowed; }
+.field-error .field-input { border-color: var(--color-background-negative); }
+.field-error .field-label { color: var(--color-content-negative); }
+.field-hint { font-size: 12px; color: var(--color-content-negative); }
+.field-textarea { min-height: 96px; resize: vertical; }
+.field-select-wrap { position: relative; }
+.field-select { appearance: none; padding-right: 36px; cursor: pointer; }
+.select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+/* Iconos */
+.field-icon { position: absolute; top: 50%; transform: translateY(-50%); color: var(--color-content-disabled); display: flex; pointer-events: none; }
+.field-icon-left  { left: 10px; }
+.field-icon-right { right: 10px; }`;
+---
+<Layout title="Campos de Texto" section="components" subNav={subNav} pageTitle="Campos de Texto" pageDesc="63 variantes — 3 tipos × 7 estados × 3 tamaños.">
+
+  <p class="section-label">Constructor</p>
+  <div class="builder">
+
+    <div class="builder-panel">
+      <p class="builder-panel-title">Propiedades</p>
+
+      <div class="prop-group">
+        <span class="prop-label">Tipo</span>
+        <div class="prop-pills" id="p-type">
+          <button class="pill active" data-value="input">Text Input</button>
+          <button class="pill" data-value="select">Dropdown</button>
+          <button class="pill" data-value="textarea">Textarea</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Estado</span>
+        <div class="prop-pills" id="p-state">
+          <button class="pill active" data-value="default">Default</button>
+          <button class="pill" data-value="error">Error</button>
+          <button class="pill" data-value="disabled">Deshabilitado</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Etiqueta</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-label-show" checked />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <input class="prop-input" id="p-label" type="text" value="Correo electrónico" />
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Placeholder</span>
+        <input class="prop-input" id="p-placeholder" type="text" value="usuario@email.com" />
+      </div>
+
+      <!-- Ícono izquierdo -->
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Ícono izquierdo</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-icon-left-show" />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <div id="p-icon-left-picker" class="icon-picker" style="display:none">
+          {icons.map((ic, i) => (
+            <button class:list={['icon-pill', { active: i === 0 }]} data-key={ic.key} title={ic.title} set:html={ic.svg} />
+          ))}
+        </div>
+      </div>
+
+      <!-- Ícono derecho -->
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Ícono derecho</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-icon-right-show" />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <div id="p-icon-right-picker" class="icon-picker" style="display:none">
+          {icons.map((ic, i) => (
+            <button class:list={['icon-pill', { active: i === 0 }]} data-key={ic.key} title={ic.title} set:html={ic.svg} />
+          ))}
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Texto de ayuda</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-hint-show" />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <input class="prop-input" id="p-hint" type="text" value="Ingresa un correo válido." />
+      </div>
+    </div>
+
+    <div class="builder-preview">
+      <div id="comp-preview" style="width:100%;max-width:340px"></div>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:24px">Propiedades del componente</p>
+  <table class="ds-table" style="margin-bottom:24px">
+    <thead><tr><th>Propiedad</th><th>Valores</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td>Type</td><td>Text Input · Text Area · Dropdown</td><td>Text Input</td></tr>
+      <tr><td>Size</td><td>Grande · Mediano · Pequeño</td><td>Mediano</td></tr>
+      <tr><td>State</td><td>Default · Focus · Typing · Filled · Error · Disabled · Hover</td><td>Default</td></tr>
+      <tr><td>Label</td><td>String</td><td>Label</td></tr>
+      <tr><td>View Label</td><td>Boolean</td><td>true</td></tr>
+      <tr><td>Text</td><td>String (placeholder / valor)</td><td>Placeholder</td></tr>
+      <tr><td>Left Icon</td><td>Instance swap (7 iconos)</td><td>search</td></tr>
+      <tr><td>View Left Icon</td><td>Boolean</td><td>false</td></tr>
+      <tr><td>Right Icon</td><td>Instance swap (7 iconos)</td><td>eye</td></tr>
+      <tr><td>View Right Icon</td><td>Boolean</td><td>false</td></tr>
+      <tr><td>Texto Emergente</td><td>String (ayuda / error)</td><td>Texto de ayuda</td></tr>
+      <tr><td>View Texto Emergente</td><td>Boolean</td><td>false</td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-label">HTML generado</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-copy">Copiar</button>
+    <pre id="comp-code"></pre>
+  </div>
+
+  <p class="section-label">CSS completo</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={cssCode}>Copiar</button>
+    <pre>{cssCode}</pre>
+  </div>
+
+</Layout>
+
+<style is:global>
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field-label { font-size:13px; font-weight:500; color:var(--color-content-secondary); }
+  .field-wrap { position:relative; }
+  .field-input { width:100%; padding:10px 12px; font-size:14px; font-family:inherit; color:var(--color-content-primary); background:var(--color-background-primary); border:1.5px solid var(--color-border-secondary); border-radius:8px; outline:none; transition:border-color .15s,box-shadow .15s; }
+  .field-input::placeholder { color:var(--color-content-disabled); }
+  .field-input:focus { border-color:var(--color-brand-500); box-shadow:0 0 0 3px rgba(81,163,163,.15); }
+  .field-input:disabled { background:var(--color-background-hover); color:var(--color-content-disabled); cursor:not-allowed; }
+  .field-error .field-input { border-color:var(--color-background-negative); }
+  .field-error .field-label { color:var(--color-background-negative); }
+  .field-hint { font-size:12px; }
+  .field-textarea { min-height:96px; resize:vertical; }
+  .field-select-wrap { position:relative; }
+  .field-select { appearance:none; padding-right:36px; cursor:pointer; }
+  .select-arrow { position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; }
+  .field-icon { position:absolute; top:50%; transform:translateY(-50%); color:var(--color-content-disabled); display:flex; pointer-events:none; }
+  .field-icon-left  { left:10px; }
+  .field-icon-right { right:10px; }
+</style>
+
+<script>
+  function getIconSvg(pickerId: string): string {
+    return document.querySelector(`#${pickerId} .icon-pill.active`)?.innerHTML?.trim() ?? '';
+  }
+
+  function buildHTML(
+    type: string, state: string,
+    label: string, showLabel: boolean, placeholder: string,
+    hint: string, showHint: boolean,
+    leftSvg: string, rightSvg: string
+  ): string {
+    const errCls    = state === 'error'    ? ' field-error' : '';
+    const disAttr   = state === 'disabled' ? ' disabled'    : '';
+    const labelHtml = showLabel ? `\n  <label class="field-label">${label}</label>` : '';
+    const hintColor = state === 'error' ? 'var(--color-content-negative)' : 'var(--color-content-tertiary)';
+    const hintHtml  = showHint ? `\n  <span class="field-hint" style="color:${hintColor}">${hint}</span>` : '';
+    const lIconHtml = leftSvg  ? `\n    <span class="field-icon field-icon-left">${leftSvg}</span>`  : '';
+    const rIconHtml = rightSvg ? `\n    <span class="field-icon field-icon-right">${rightSvg}</span>` : '';
+    const padStyle  = [leftSvg ? 'padding-left:36px' : '', rightSvg ? 'padding-right:36px' : ''].filter(Boolean).join(';');
+    const padAttr   = padStyle ? ` style="${padStyle}"` : '';
+    const arrowSvg  = `<svg class="select-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="#727880" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
+    if (type === 'select') {
+      const selPad = leftSvg ? ' style="padding-left:36px"' : '';
+      return `<div class="field${errCls}">
+  ${labelHtml}
+  <div class="field-wrap field-select-wrap">${lIconHtml}
+    <select class="field-input field-select"${selPad}${disAttr}>
+      <option>${placeholder}</option>
+      <option>Opción A</option>
+      <option>Opción B</option>
+    </select>
+    ${arrowSvg}
+  </div>${hintHtml}
+</div>`;
+    }
+
+    if (type === 'textarea') {
+      const taPad = leftSvg ? ' style="padding-left:36px;padding-top:10px"' : '';
+      const lIconTA = leftSvg ? `\n    <span class="field-icon field-icon-left" style="top:14px;transform:none">${leftSvg}</span>` : '';
+      return `<div class="field${errCls}">
+  ${labelHtml}
+  <div class="field-wrap">${lIconTA}
+    <textarea class="field-input field-textarea"${taPad} placeholder="${placeholder}"${disAttr}></textarea>
+  </div>${hintHtml}
+</div>`;
+    }
+
+    return `<div class="field${errCls}">
+  ${labelHtml}
+  <div class="field-wrap">${lIconHtml}
+    <input class="field-input"${padAttr} placeholder="${placeholder}"${disAttr} />${rIconHtml}
+  </div>${hintHtml}
+</div>`;
+  }
+
+  function update() {
+    const type        = (document.querySelector('#p-type .pill.active') as HTMLElement)?.dataset.value ?? 'input';
+    const state       = (document.querySelector('#p-state .pill.active') as HTMLElement)?.dataset.value ?? 'default';
+    const label       = (document.getElementById('p-label')       as HTMLInputElement).value || 'Correo electrónico';
+    const showLabel   = (document.getElementById('p-label-show') as HTMLInputElement).checked;
+    const placeholder = (document.getElementById('p-placeholder') as HTMLInputElement).value || 'usuario@email.com';
+    const hint        = (document.getElementById('p-hint')        as HTMLInputElement).value || 'Texto de ayuda';
+    const showHint    = (document.getElementById('p-hint-show')   as HTMLInputElement).checked;
+    const showL       = (document.getElementById('p-icon-left-show')  as HTMLInputElement).checked;
+    const showR       = (document.getElementById('p-icon-right-show') as HTMLInputElement).checked;
+    const leftSvg     = showL ? getIconSvg('p-icon-left-picker')  : '';
+    const rightSvg    = showR ? getIconSvg('p-icon-right-picker') : '';
+
+    const html = buildHTML(type, state, label, showLabel, placeholder, hint, showHint, leftSvg, rightSvg);
+    (document.getElementById('comp-preview') as HTMLElement).innerHTML = html;
+    (document.getElementById('comp-code')    as HTMLElement).textContent = html;
+  }
+
+  // Pill groups
+  document.querySelectorAll('#p-type .pill, #p-state .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.closest('.prop-pills')!.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  // Icon picker selection
+  document.querySelectorAll('#p-icon-left-picker .icon-pill, #p-icon-right-picker .icon-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.closest('.icon-picker')!.querySelectorAll('.icon-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  // Toggle icon visibility
+  (document.getElementById('p-icon-left-show') as HTMLInputElement).addEventListener('change', e => {
+    const show = (e.target as HTMLInputElement).checked;
+    (document.getElementById('p-icon-left-picker') as HTMLElement).style.display = show ? 'flex' : 'none';
+    update();
+  });
+  (document.getElementById('p-icon-right-show') as HTMLInputElement).addEventListener('change', e => {
+    const show = (e.target as HTMLInputElement).checked;
+    (document.getElementById('p-icon-right-picker') as HTMLElement).style.display = show ? 'flex' : 'none';
+    update();
+  });
+
+  (document.getElementById('p-label-show') as HTMLInputElement).addEventListener('change', update);
+  (document.getElementById('p-hint-show')  as HTMLInputElement).addEventListener('change', update);
+
+  ['p-label', 'p-placeholder', 'p-hint'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', update);
+  });
+
+  document.getElementById('comp-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  update();
+</script>

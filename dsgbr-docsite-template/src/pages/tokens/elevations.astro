@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { effectStyles } from '../../data/tokens.js';
+
+const subNav = [
+  { label: 'Colores',       href: '/tokens/colors',        id: 'colors' },
+  { label: 'Tipografía',    href: '/tokens/typography',    id: 'typography' },
+  { label: 'Espaciado',     href: '/tokens/spacing',       id: 'spacing' },
+  { label: 'Border Radius', href: '/tokens/border-radius', id: 'border-radius' },
+  { label: 'Elevaciones',   href: '/tokens/elevations',    id: 'elevations' },
+  { label: 'Variables',     href: '/tokens/variables',     id: 'variables' },
+  { label: 'Descargas',     href: '/tokens/descargas',     id: 'descargas' },
+];
+---
+<Layout title="Elevaciones" section="tokens" subNav={subNav} pageTitle="Elevaciones" pageDesc={`${effectStyles.length} niveles de sombra para crear jerarquía visual y profundidad.`}>
+
+  <p class="section-label">Niveles de elevación</p>
+  <div class="elevation-grid">
+    {effectStyles.map(e => (
+      <div class="elev-card">
+        <div class="elev-preview">
+          <div class="elev-box" style={`box-shadow:${e.css}`}>
+            <span class="elev-label">{e.label}</span>
+          </div>
+        </div>
+        <div class="token-body">
+          <div class="token-name">{e.name}</div>
+          <code class="elev-css">{e.css}</code>
+          <div class="token-meta" style="margin-top:10px">
+            <button class="copy-btn" data-copy={`box-shadow: ${e.css};`}>Copiar CSS</button>
+            <button class="copy-btn" data-copy={e.name}>Copiar token</button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p class="section-label" style="margin-top:40px">Variables CSS</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={`:root {\n${effectStyles.map(e=>`  --${e.name.replace('/','--').replace('-','_')}: ${e.css};`).join('\n')}\n}`}>Copiar todo</button>
+    <pre>{`:root {\n${effectStyles.map(e=>`  --${e.name.replace('/','--').replace('-','_')}: ${e.css};`).join('\n')}\n}`}</pre>
+  </div>
+</Layout>
+
+<style is:global>
+  .elevation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .elev-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+  .elev-preview { background: var(--surface-base); height: 140px; display: flex; align-items: center; justify-content: center; }
+  .elev-box { width: 100px; height: 80px; background: #fff; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; }
+  .elev-label { font-size: 13px; font-weight: 600; color: var(--txt-secondary); }
+  .elev-css { display: block; font-size: 11px; color: var(--txt-tertiary); font-family: 'Courier New', monospace; margin-top: 8px; line-height: 1.6; word-break: break-all; }
+</style>

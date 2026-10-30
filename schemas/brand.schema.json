@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robman.digital/dsgbr/brand.schema.json",
+  "title": "brand.json (DSGBR)",
+  "type": "object",
+  "required": ["empresa", "base", "plataformas", "color"],
+  "properties": {
+    "empresa": {
+      "type": "object",
+      "required": ["nombre"],
+      "properties": {
+        "nombre": { "type": "string" },
+        "sector": { "type": "string" },
+        "tono": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "base": { "enum": ["calma", "expresiva", "utilitaria"] },
+    "plataformas": {
+      "type": "array",
+      "items": { "enum": ["web", "ios", "android"] },
+      "minItems": 1
+    },
+    "color": {
+      "type": "object",
+      "required": ["marca"],
+      "properties": {
+        "marca": { "$ref": "#/$defs/colorEntrada" },
+        "secundario": { "$ref": "#/$defs/colorEntrada" },
+        "terciario": { "$ref": "#/$defs/colorEntrada" }
+      }
+    },
+    "tipografia": {
+      "type": "object",
+      "properties": {
+        "familiaWeb": { "$ref": "#/$defs/datoConOrigen" },
+        "familiaTitulos": { "$ref": "#/$defs/datoConOrigen" }
+      }
+    },
+    "logo": {
+      "type": "object",
+      "properties": {
+        "versiones": { "type": "array", "items": { "enum": ["principal", "reducido", "monocromo-claro", "monocromo-oscuro"] } }
+      }
+    }
+  },
+  "$defs": {
+    "origen": { "enum": ["manual", "brief", "base", "manual-a-mano"] },
+    "datoConOrigen": {
+      "type": "object",
+      "required": ["valor", "origen"],
+      "properties": {
+        "valor": { "type": "string" },
+        "origen": { "$ref": "#/$defs/origen" }
+      }
+    },
+    "colorEntrada": {
+      "type": "object",
+      "required": ["hex", "origen"],
+      "properties": {
+        "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "origen": { "$ref": "#/$defs/origen" }
+      }
+    }
+  }
+}

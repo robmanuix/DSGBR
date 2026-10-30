@@ -1,0 +1,188 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',       id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',   id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',    id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',      href: '/components/figma',        id: 'figma' },
+];
+
+const cssCode = `.notif { display:flex; border-radius:8px; border:1px solid; overflow:hidden; max-width:760px; }
+.notif-accent { width:4px; flex-shrink:0; }
+.notif-body { flex:1; display:flex; align-items:center; justify-content:space-between; padding:14px 16px; gap:12px; }
+.notif-left { display:flex; align-items:flex-start; gap:12px; }
+.notif-badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.notif-title { font-size:14px; font-weight:600; }
+.notif-msg   { font-size:13px; margin-top:2px; }
+.notif-btn { padding:6px 14px; border-radius:6px; background:transparent; border:1.5px solid; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; font-family:inherit; }`;
+---
+<Layout title="Notificaciones" section="components" subNav={subNav} pageTitle="Notificaciones" pageDesc="4 tipos — Info, Éxito, Error y Advertencia.">
+
+  <p class="section-label">Constructor</p>
+  <div class="builder">
+
+    <div class="builder-panel">
+      <p class="builder-panel-title">Propiedades</p>
+
+      <div class="prop-group">
+        <span class="prop-label">Tipo</span>
+        <div class="prop-pills" id="p-type">
+          <button class="pill active" data-value="info">Info</button>
+          <button class="pill" data-value="success">Éxito</button>
+          <button class="pill" data-value="error">Error</button>
+          <button class="pill" data-value="warning">Advertencia</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Mensaje</span>
+        <input class="prop-input" id="p-msg" type="text" value="Tu sesión expirará en 10 minutos." />
+      </div>
+
+      <div class="prop-group prop-row">
+        <span class="prop-label">Mostrar botón</span>
+        <label class="ctrl-toggle">
+          <input type="checkbox" id="p-btn" checked />
+          <span class="ctrl-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="builder-preview" style="padding:32px">
+      <div id="prev-notif" class="notif" style="width:100%;max-width:520px;background:var(--color-background-info-subtle);border-color:color-mix(in srgb, var(--color-background-info) 14%, transparent)">
+        <div id="prev-accent" class="notif-accent" style="background:var(--color-background-info)"></div>
+        <div class="notif-body">
+          <div class="notif-left">
+            <div id="prev-badge" class="notif-badge" style="background:var(--color-background-info)">
+              <span id="prev-icon" style="color:var(--color-content-primary-inverse);font-weight:700;font-size:13px">ℹ</span>
+            </div>
+            <div>
+              <div id="prev-title" class="notif-title" style="color:var(--color-content-info-bold)">Información</div>
+              <div id="prev-msg" class="notif-msg" style="color:var(--color-content-info-bold)">Tu sesión expirará en 10 minutos.</div>
+            </div>
+          </div>
+          <button id="prev-dismiss" class="notif-btn" style="color:var(--color-background-info);border-color:var(--color-background-info)">Descartar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:24px">Propiedades del componente</p>
+  <table class="ds-table" style="margin-bottom:24px">
+    <thead><tr><th>Propiedad</th><th>Valores</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td>Type</td><td>Info · Success · Error · Warning</td><td>Info</td></tr>
+      <tr><td>Text</td><td>String</td><td>Todo parece estar en orden.</td></tr>
+      <tr><td>View Button Small</td><td>Boolean</td><td>true</td></tr>
+      <tr><td>Button Small</td><td>String</td><td>Descartar</td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-label">HTML generado</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-copy">Copiar</button>
+    <pre id="comp-code"></pre>
+  </div>
+
+  <p class="section-label">CSS completo</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={cssCode}>Copiar</button>
+    <pre>{cssCode}</pre>
+  </div>
+
+</Layout>
+
+<style is:global>
+  .notif { display:flex; border-radius:8px; border:1px solid; overflow:hidden; }
+  .notif-accent { width:4px; flex-shrink:0; }
+  .notif-body { flex:1; display:flex; align-items:center; justify-content:space-between; padding:14px 16px; gap:12px; }
+  .notif-left { display:flex; align-items:flex-start; gap:12px; }
+  .notif-badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .notif-title { font-size:14px; font-weight:600; }
+  .notif-msg   { font-size:13px; margin-top:2px; }
+  .notif-btn { padding:6px 14px; border-radius:6px; background:transparent; border:1.5px solid; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; font-family:inherit; }
+</style>
+
+<script>
+  const TYPES: Record<string, { label: string; icon: string; bg: string; accent: string; text: string }> = {
+    info:    { label: 'Información',    icon: 'ℹ', bg: 'var(--color-background-info-subtle)',     accent: 'var(--color-background-info)',     text: 'var(--color-content-info-bold)' },
+    success: { label: '¡Éxito!',        icon: '✓', bg: 'var(--color-background-positive-subtle)', accent: 'var(--color-background-positive)', text: 'var(--color-content-positive-bold)' },
+    error:   { label: '¡Error!',        icon: '✕', bg: 'var(--color-background-negative-subtle)', accent: 'var(--color-background-negative)', text: 'var(--color-content-negative-bold)' },
+    warning: { label: '¡Advertencia!',  icon: '!', bg: 'var(--color-background-notice-subtle)',   accent: 'var(--color-background-notice)',   text: 'var(--color-content-notice-bold)' },
+  };
+
+  function update() {
+    const type    = (document.querySelector('#p-type .pill.active') as HTMLElement)?.dataset.value ?? 'info';
+    const msg     = (document.getElementById('p-msg') as HTMLInputElement).value || 'Tu sesión expirará en 10 minutos.';
+    const showBtn = (document.getElementById('p-btn') as HTMLInputElement).checked;
+
+    const t = TYPES[type];
+
+    // Update preview
+    const notif   = document.getElementById('prev-notif') as HTMLElement;
+    const accent  = document.getElementById('prev-accent') as HTMLElement;
+    const badge   = document.getElementById('prev-badge') as HTMLElement;
+    const icon    = document.getElementById('prev-icon') as HTMLElement;
+    const title   = document.getElementById('prev-title') as HTMLElement;
+    const msgEl   = document.getElementById('prev-msg') as HTMLElement;
+    const dismiss = document.getElementById('prev-dismiss') as HTMLElement;
+
+    notif.style.background   = t.bg;
+    notif.style.borderColor  = `color-mix(in srgb, ${t.accent} 14%, transparent)`;
+    accent.style.background  = t.accent;
+    badge.style.background   = t.accent;
+    icon.textContent         = t.icon;
+    title.textContent        = t.label;
+    title.style.color        = t.text;
+    msgEl.textContent        = msg;
+    msgEl.style.color        = t.text;
+    dismiss.style.display    = showBtn ? '' : 'none';
+    dismiss.style.color      = t.accent;
+    dismiss.style.borderColor = t.accent;
+
+    // Generate code
+    const btnHtml = showBtn
+      ? `\n    <button class="notif-btn" style="color:${t.accent};border-color:${t.accent}">Descartar</button>`
+      : '';
+    const code = `<div class="notif" style="background:${t.bg};border-color:color-mix(in srgb, ${t.accent} 14%, transparent)">
+  <div class="notif-accent" style="background:${t.accent}"></div>
+  <div class="notif-body">
+    <div class="notif-left">
+      <div class="notif-badge" style="background:${t.accent}">
+        <span style="color:var(--color-content-primary-inverse);font-weight:700;font-size:13px">${t.icon}</span>
+      </div>
+      <div>
+        <div class="notif-title" style="color:${t.text}">${t.label}</div>
+        <div class="notif-msg" style="color:${t.text}">${msg}</div>
+      </div>
+    </div>${btnHtml}
+  </div>
+</div>`;
+
+    (document.getElementById('comp-code') as HTMLElement).textContent = code;
+  }
+
+  document.querySelectorAll('#p-type .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#p-type .pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  (document.getElementById('p-msg') as HTMLInputElement).addEventListener('input', update);
+  (document.getElementById('p-btn') as HTMLInputElement).addEventListener('change', update);
+
+  document.getElementById('comp-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  update();
+</script>

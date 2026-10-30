@@ -1,0 +1,10 @@
+node_modules
+dist
+.astro
+/public/descargas
+/public/componentes
+/tokens
+/build
+/entrada/*
+!/entrada/.gitkeep
+/docsite.config.json

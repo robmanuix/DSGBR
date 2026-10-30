@@ -1,0 +1,68 @@
+{
+  "texto": [
+    {
+      "nombre": "Título/H1",
+      "familia": "Inter",
+      "estilo": "Semi Bold",
+      "tamano": 32,
+      "altura": 40,
+      "espaciado": 0,
+      "peso": 600
+    },
+    {
+      "nombre": "Título/H2",
+      "familia": "Inter",
+      "estilo": "Semi Bold",
+      "tamano": 24,
+      "altura": 30,
+      "espaciado": 0,
+      "peso": 600
+    },
+    {
+      "nombre": "Cuerpo/Grande",
+      "familia": "Inter",
+      "estilo": "Regular",
+      "tamano": 18,
+      "altura": 27,
+      "espaciado": 0,
+      "peso": 400
+    },
+    {
+      "nombre": "Cuerpo/Normal",
+      "familia": "Inter",
+      "estilo": "Regular",
+      "tamano": 16,
+      "altura": 24,
+      "espaciado": 0,
+      "peso": 400
+    },
+    {
+      "nombre": "Cuerpo/Pequeño",
+      "familia": "Inter",
+      "estilo": "Regular",
+      "tamano": 14,
+      "altura": 21,
+      "espaciado": 0,
+      "peso": 400
+    },
+    {
+      "nombre": "Botón/Normal",
+      "familia": "Inter",
+      "estilo": "Semi Bold",
+      "tamano": 14,
+      "altura": 20,
+      "espaciado": 0,
+      "peso": 600
+    }
+  ],
+  "efectos": [
+    {
+      "nombre": "Elevación/1",
+      "css": "0px 0px 2px 0px rgb(0 0 0 / 0.05), 0px 2px 4px 0px rgb(0 0 0 / 0.07)"
+    },
+    {
+      "nombre": "Elevación/2",
+      "css": "0px 0px 4px 0px rgb(0 0 0 / 0.05), 0px 4px 8px 0px rgb(0 0 0 / 0.09)"
+    }
+  ]
+}

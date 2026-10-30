@@ -1,0 +1,255 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',       id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',   id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',    id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',      href: '/components/figma',        id: 'figma' },
+];
+---
+<Layout title="Selecciones" section="components" subNav={subNav} pageTitle="Selecciones" pageDesc="Toggle, Checkbox y Radio Button con múltiples estados.">
+
+  <p class="section-label">Constructor</p>
+  <div class="builder">
+
+    <div class="builder-panel">
+      <p class="builder-panel-title">Propiedades</p>
+
+      <div class="prop-group">
+        <span class="prop-label">Componente</span>
+        <div class="prop-pills" id="p-comp">
+          <button class="pill active" data-value="toggle">Toggle</button>
+          <button class="pill" data-value="checkbox">Checkbox</button>
+          <button class="pill" data-value="radio">Radio</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Estado</span>
+        <div class="prop-pills" id="p-state">
+          <button class="pill active" data-value="default">Default</button>
+          <button class="pill" data-value="selected">Seleccionado</button>
+          <button class="pill" data-value="disabled">Deshabilitado</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Etiqueta</span>
+        <input class="prop-input" id="p-label" type="text" value="Activar notificaciones" />
+      </div>
+    </div>
+
+    <div class="builder-preview">
+      <!-- Toggle preview -->
+      <div id="prev-toggle">
+        <label class="sel-row">
+          <input class="tog-input" type="checkbox" id="prev-tog-input" />
+          <span class="tog-track"></span>
+          <span class="sel-label" id="prev-tog-label">Activar notificaciones</span>
+        </label>
+      </div>
+      <!-- Checkbox preview -->
+      <div id="prev-checkbox" style="display:none">
+        <label class="sel-row">
+          <input class="chk-input" type="checkbox" id="prev-chk-input" />
+          <span class="chk-box"></span>
+          <span class="sel-label" id="prev-chk-label">Activar notificaciones</span>
+        </label>
+      </div>
+      <!-- Radio preview -->
+      <div id="prev-radio" style="display:none">
+        <label class="sel-row">
+          <input class="rad-input" type="radio" id="prev-rad-input" />
+          <span class="rad-outer"></span>
+          <span class="sel-label" id="prev-rad-label">Activar notificaciones</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:24px">Propiedades del componente</p>
+  <table class="ds-table" style="margin-bottom:24px">
+    <thead><tr><th>Componente</th><th>Variantes</th><th>Propiedades</th></tr></thead>
+    <tbody>
+      <tr><td>Toggle</td><td>4 (On/Off × Enabled/Disabled)</td><td>State · View Label · Label</td></tr>
+      <tr><td>Checkbox</td><td>5 (Unchecked · Hover · Checked · Error · Disabled)</td><td>State · View Label · Label</td></tr>
+      <tr><td>Radio Button</td><td>5 (Unselected · Hover · Selected · Error · Disabled)</td><td>State · View Label · Label</td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-label">HTML generado</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-copy">Copiar</button>
+    <pre id="comp-code"></pre>
+  </div>
+
+  <p class="section-label">CSS completo</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={`/* Toggle */
+.tog-input { display:none; }
+.tog-track { width:44px; height:24px; background:var(--color-border-primary); border-radius:999px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; flex-shrink:0; }
+.tog-track::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; background:var(--color-background-primary); border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.tog-input:checked ~ .tog-track { background:var(--color-brand-500); }
+.tog-input:checked ~ .tog-track::after { transform:translateX(20px); }
+.tog-input:disabled ~ .tog-track { opacity:.45; cursor:not-allowed; }
+
+/* Checkbox */
+.chk-input { display:none; }
+.chk-box { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:4px; background:var(--color-background-primary); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.chk-box::after { content:''; width:10px; height:6px; border-left:2px solid var(--color-background-primary); border-bottom:2px solid var(--color-background-primary); transform:rotate(-45deg) translateY(-1px); opacity:0; }
+.chk-input:checked ~ .chk-box { background:var(--color-brand-500); border-color:var(--color-brand-500); }
+.chk-input:checked ~ .chk-box::after { opacity:1; }
+.chk-input:disabled ~ .chk-box { opacity:.45; cursor:not-allowed; }
+
+/* Radio */
+.rad-input { display:none; }
+.rad-outer { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:50%; background:var(--color-background-primary); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rad-outer::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--color-brand-500); opacity:0; transition:opacity .15s; }
+.rad-input:checked ~ .rad-outer { border-color:var(--color-brand-500); }
+.rad-input:checked ~ .rad-outer::after { opacity:1; }
+.rad-input:disabled ~ .rad-outer { opacity:.45; cursor:not-allowed; }
+
+/* Shared */
+.sel-row { display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.sel-label { font-size:14px; color:var(--color-content-secondary); }`}>Copiar CSS</button>
+    <pre>{`/* Toggle */
+.tog-input { display:none; }
+.tog-track { width:44px; height:24px; background:var(--color-border-primary); border-radius:999px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; }
+.tog-track::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; background:var(--color-background-primary); border-radius:50%; transition:transform .2s; }
+.tog-input:checked ~ .tog-track { background:var(--color-brand-500); }
+.tog-input:checked ~ .tog-track::after { transform:translateX(20px); }
+.tog-input:disabled ~ .tog-track { opacity:.45; cursor:not-allowed; }
+
+/* Checkbox */
+.chk-input { display:none; }
+.chk-box { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:4px; display:inline-flex; align-items:center; justify-content:center; }
+.chk-box::after { content:''; width:10px; height:6px; border-left:2px solid var(--color-background-primary); border-bottom:2px solid var(--color-background-primary); transform:rotate(-45deg) translateY(-1px); opacity:0; }
+.chk-input:checked ~ .chk-box { background:var(--color-brand-500); border-color:var(--color-brand-500); }
+.chk-input:checked ~ .chk-box::after { opacity:1; }
+.chk-input:disabled ~ .chk-box { opacity:.45; }
+
+/* Radio */
+.rad-input { display:none; }
+.rad-outer { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
+.rad-outer::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--color-brand-500); opacity:0; }
+.rad-input:checked ~ .rad-outer { border-color:var(--color-brand-500); }
+.rad-input:checked ~ .rad-outer::after { opacity:1; }
+.rad-input:disabled ~ .rad-outer { opacity:.45; }
+
+/* Shared */
+.sel-row { display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.sel-label { font-size:14px; color:var(--color-content-secondary); }`}</pre>
+  </div>
+
+</Layout>
+
+<style is:global>
+  .sel-row { display:inline-flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+  .sel-label { font-size:14px; color:var(--color-content-secondary); }
+
+  .tog-input { display:none; }
+  .tog-track { width:44px; height:24px; background:var(--color-border-primary); border-radius:999px; position:relative; cursor:pointer; transition:background .2s; display:inline-block; flex-shrink:0; }
+  .tog-track::after { content:''; position:absolute; top:3px; left:3px; width:18px; height:18px; background:var(--color-background-primary); border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .tog-input:checked ~ .tog-track { background:var(--color-brand-500); }
+  .tog-input:checked ~ .tog-track::after { transform:translateX(20px); }
+  .tog-input:disabled ~ .tog-track { opacity:.45; cursor:not-allowed; }
+
+  .chk-input { display:none; }
+  .chk-box { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:4px; background:var(--color-background-primary); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s,border-color .15s; cursor:pointer; }
+  .chk-box::after { content:''; width:10px; height:6px; border-left:2px solid var(--color-background-primary); border-bottom:2px solid var(--color-background-primary); transform:rotate(-45deg) translateY(-1px); opacity:0; }
+  .chk-input:checked ~ .chk-box { background:var(--color-brand-500); border-color:var(--color-brand-500); }
+  .chk-input:checked ~ .chk-box::after { opacity:1; }
+  .chk-input:disabled ~ .chk-box { opacity:.45; cursor:not-allowed; }
+
+  .rad-input { display:none; }
+  .rad-outer { width:20px; height:20px; border:1.5px solid var(--color-border-primary); border-radius:50%; background:var(--color-background-primary); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transition:border-color .15s; cursor:pointer; }
+  .rad-outer::after { content:''; width:10px; height:10px; border-radius:50%; background:var(--color-brand-500); opacity:0; transition:opacity .15s; }
+  .rad-input:checked ~ .rad-outer { border-color:var(--color-brand-500); }
+  .rad-input:checked ~ .rad-outer::after { opacity:1; }
+  .rad-input:disabled ~ .rad-outer { opacity:.45; cursor:not-allowed; }
+</style>
+
+<script>
+  function update() {
+    const comp  = (document.querySelector('#p-comp .pill.active') as HTMLElement)?.dataset.value ?? 'toggle';
+    const state = (document.querySelector('#p-state .pill.active') as HTMLElement)?.dataset.value ?? 'default';
+    const label = (document.getElementById('p-label') as HTMLInputElement).value || 'Activar notificaciones';
+
+    const selected = state === 'selected';
+    const disabled = state === 'disabled';
+
+    // Show/hide
+    (document.getElementById('prev-toggle') as HTMLElement).style.display   = comp === 'toggle'   ? '' : 'none';
+    (document.getElementById('prev-checkbox') as HTMLElement).style.display = comp === 'checkbox' ? '' : 'none';
+    (document.getElementById('prev-radio') as HTMLElement).style.display    = comp === 'radio'    ? '' : 'none';
+
+    // Update toggle
+    const togIn = document.getElementById('prev-tog-input') as HTMLInputElement;
+    togIn.checked = selected; togIn.disabled = disabled;
+    (document.getElementById('prev-tog-label') as HTMLElement).textContent = label;
+    (document.getElementById('prev-tog-label') as HTMLElement).style.color = disabled ? 'var(--color-content-disabled)' : 'var(--color-content-secondary)';
+
+    // Update checkbox
+    const chkIn = document.getElementById('prev-chk-input') as HTMLInputElement;
+    chkIn.checked = selected; chkIn.disabled = disabled;
+    (document.getElementById('prev-chk-label') as HTMLElement).textContent = label;
+    (document.getElementById('prev-chk-label') as HTMLElement).style.color = disabled ? 'var(--color-content-disabled)' : 'var(--color-content-secondary)';
+
+    // Update radio
+    const radIn = document.getElementById('prev-rad-input') as HTMLInputElement;
+    radIn.checked = selected; radIn.disabled = disabled;
+    (document.getElementById('prev-rad-label') as HTMLElement).textContent = label;
+    (document.getElementById('prev-rad-label') as HTMLElement).style.color = disabled ? 'var(--color-content-disabled)' : 'var(--color-content-secondary)';
+
+    // Generate code
+    const chk = selected ? ' checked' : '';
+    const dis = disabled ? ' disabled' : '';
+    const disColor = disabled ? ' style="color:var(--color-content-disabled)"' : '';
+
+    let code = '';
+    if (comp === 'toggle') {
+      code = `<label class="sel-row">
+  <input class="tog-input" type="checkbox"${chk}${dis} />
+  <span class="tog-track"></span>
+  <span class="sel-label"${disColor}>${label}</span>
+</label>`;
+    } else if (comp === 'checkbox') {
+      code = `<label class="sel-row">
+  <input class="chk-input" type="checkbox"${chk}${dis} />
+  <span class="chk-box"></span>
+  <span class="sel-label"${disColor}>${label}</span>
+</label>`;
+    } else {
+      code = `<label class="sel-row">
+  <input class="rad-input" type="radio"${chk}${dis} />
+  <span class="rad-outer"></span>
+  <span class="sel-label"${disColor}>${label}</span>
+</label>`;
+    }
+
+    (document.getElementById('comp-code') as HTMLElement).textContent = code;
+  }
+
+  document.querySelectorAll('#p-comp .pill, #p-state .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.closest('.prop-pills')!.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  (document.getElementById('p-label') as HTMLInputElement).addEventListener('input', update);
+
+  document.getElementById('comp-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  update();
+</script>

@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { borderRadius } from '../../data/tokens.js';
+
+const subNav = [
+  { label: 'Colores',       href: '/tokens/colors',        id: 'colors' },
+  { label: 'Tipografía',    href: '/tokens/typography',    id: 'typography' },
+  { label: 'Espaciado',     href: '/tokens/spacing',       id: 'spacing' },
+  { label: 'Border Radius', href: '/tokens/border-radius', id: 'border-radius' },
+  { label: 'Elevaciones',   href: '/tokens/elevations',    id: 'elevations' },
+  { label: 'Variables',     href: '/tokens/variables',     id: 'variables' },
+  { label: 'Descargas',     href: '/tokens/descargas',     id: 'descargas' },
+];
+---
+<Layout title="Border Radius" section="tokens" subNav={subNav} pageTitle="Border Radius" pageDesc={`${borderRadius.length} valores de radio de borde para definir la forma de los elementos.`}>
+
+  <p class="section-label">Escala de radio</p>
+  <div class="radius-grid">
+    {borderRadius.map(r => (
+      <div class="radius-card" data-searchable={r.name}>
+        <div class="radius-preview">
+          <div class="radius-box" style={`border-radius:${Math.min(r.value, 80)}px`}></div>
+        </div>
+        <div class="token-body">
+          <div class="token-name">{r.name}</div>
+          <div class="radius-sub">{r.label}</div>
+          <div class="token-meta">
+            <span class="token-value">{r.value === 999 ? '999px (full)' : `${r.value}px`}</span>
+            <button class="copy-btn" data-copy={r.value === 999 ? '9999px' : `${r.value}px`}>Copiar</button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p class="section-label" style="margin-top:40px">Variables CSS</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={`:root {\n${borderRadius.map(r=>`  --${r.name.replace('/','--')}: ${r.value === 999 ? '9999px' : r.value+'px'};`).join('\n')}\n}`}>Copiar todo</button>
+    <pre>{`:root {\n${borderRadius.map(r=>`  --${r.name.replace('/','--')}: ${r.value === 999 ? '9999px' : r.value+'px'};`).join('\n')}\n}`}</pre>
+  </div>
+</Layout>
+
+<style is:global>
+  .radius-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .radius-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow-low); }
+  .radius-preview { background: var(--surface-base); height: 120px; display: flex; align-items: center; justify-content: center; }
+  .radius-box { width: 80px; height: 80px; background: var(--prim-500); opacity: .85; }
+  .radius-sub { font-size: 11px; color: var(--txt-tertiary); margin-top: 2px; margin-bottom: 6px; }
+</style>

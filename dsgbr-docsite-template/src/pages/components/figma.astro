@@ -1,0 +1,68 @@
+---
+import { existsSync, readFileSync } from 'node:fs';
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',       id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',   id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',    id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',     href: '/components/figma',         id: 'figma' },
+];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const indice = existsSync('tokens/componentes.json') ? JSON.parse(readFileSync('tokens/componentes.json', 'utf8')) : null;
+const lista: any[] = indice?.componentes ?? [];
+const plataformas = ['Web', 'App'].filter((p) => lista.some((c) => c.plataforma === p));
+---
+<Layout title="Componentes desde Figma" section="components" subNav={subNav} pageTitle="Componentes desde Figma" pageDesc="Todos los componentes del archivo de Figma de la marca, con sus variantes y propiedades. Se actualizan al exportar de nuevo desde el plugin.">
+  {!lista.length && (
+    <div class="token-card fg-vacio">
+      <div class="token-body">
+        <div class="token-name">Aún no hay imágenes de componentes</div>
+        <div class="fg-meta">En el plugin, abre «Exportar tokens», pulsa «Imágenes de componentes» y luego «Descargar todo (.zip)». Pon el ZIP en la carpeta <code>entrada/</code> y vuelve a ejecutar el sitio.</div>
+      </div>
+    </div>
+  )}
+  {plataformas.map((pl) => (
+    <section>
+      <p class="section-label">{pl === 'Web' ? 'Componentes web' : 'Componentes de app (iOS y Android)'}</p>
+      {lista.filter((c) => c.plataforma === pl).map((c) => (
+        <article class="token-card fg-card" id={c.archivo.split('/').pop().replace('.png', '')}>
+          <div class="token-body">
+            <div class="fg-cab">
+              <div class="token-name">{c.nombre}</div>
+              <div class="fg-meta">{c.variantes} variantes</div>
+            </div>
+            <a class="fg-img" href={`${base}/${c.archivo}`} target="_blank" rel="noopener">
+              <img src={`${base}/${c.archivo}`} alt={`Variantes del componente ${c.nombre} (${pl})`} loading="lazy" width={c.ancho} height={c.alto} />
+            </a>
+            <details class="fg-props">
+              <summary>Propiedades ({c.propiedades.length})</summary>
+              <table class="fg-tabla">
+                <thead><tr><th>Propiedad</th><th>Tipo</th><th>Valores</th></tr></thead>
+                <tbody>
+                  {c.propiedades.map((p: any) => (
+                    <tr><td>{p.nombre}</td><td>{p.tipo === 'VARIANT' ? 'Variante' : p.tipo === 'BOOLEAN' ? 'Sí / No' : p.tipo === 'TEXT' ? 'Texto' : p.tipo === 'INSTANCE_SWAP' ? 'Ícono intercambiable' : p.tipo}</td><td>{p.valores ? p.valores.join(' · ') : String(p.porDefecto ?? '')}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          </div>
+        </article>
+      ))}
+    </section>
+  ))}
+</Layout>
+<style is:global>
+  .fg-card { margin-bottom: 16px; }
+  .fg-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .fg-meta { font-size: 12px; color: var(--txt-tertiary); }
+  .fg-img { display: block; overflow-x: auto; border: 1px solid var(--border-secondary, #e6e6e6); border-radius: 8px; background: #fff; padding: 12px; }
+  .fg-img img { display: block; max-width: 100%; height: auto; }
+  .fg-props { margin-top: 12px; font-size: 13px; }
+  .fg-props summary { cursor: pointer; color: var(--txt-secondary); }
+  .fg-tabla { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .fg-tabla th, .fg-tabla td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border-secondary, #e6e6e6); vertical-align: top; }
+  .fg-tabla th { font-weight: 600; color: var(--txt-tertiary); font-size: 12px; }
+  .fg-vacio code { background: rgba(0,0,0,.05); padding: 1px 5px; border-radius: 4px; }
+</style>

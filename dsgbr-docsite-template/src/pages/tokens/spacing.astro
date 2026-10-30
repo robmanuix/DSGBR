@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { spacing } from '../../data/tokens.js';
+
+const subNav = [
+  { label: 'Colores',       href: '/tokens/colors',        id: 'colors' },
+  { label: 'Tipografía',    href: '/tokens/typography',    id: 'typography' },
+  { label: 'Espaciado',     href: '/tokens/spacing',       id: 'spacing' },
+  { label: 'Border Radius', href: '/tokens/border-radius', id: 'border-radius' },
+  { label: 'Elevaciones',   href: '/tokens/elevations',    id: 'elevations' },
+  { label: 'Variables',     href: '/tokens/variables',     id: 'variables' },
+  { label: 'Descargas',     href: '/tokens/descargas',     id: 'descargas' },
+];
+---
+<Layout title="Espaciado" section="tokens" subNav={subNav} pageTitle="Espaciado" pageDesc={`${spacing.length} niveles de espaciado, de ${spacing[0]?.value}px a ${spacing[spacing.length - 1]?.value}px.`}>
+
+  <p class="section-label">Escala de espaciado</p>
+  <div class="spacing-list">
+    {spacing.map(s => {
+      const cssVar = `--${s.name.replace('/','').replace('/','--').replace(/-/g,'_')}`;
+      return (
+        <div class="spacing-row" data-searchable={s.name}>
+          <div class="sp-bar-wrap">
+            <div class="sp-bar" style={`width:${Math.min(s.value * 3, 360)}px;height:${Math.max(s.value / 2, 8)}px`}></div>
+          </div>
+          <div class="sp-info">
+            <span class="token-name">{s.name}</span>
+            <span class="token-value mono">{s.value}px</span>
+          </div>
+          <div class="sp-actions">
+            <button class="copy-btn" data-copy={`${s.value}px`}>{s.value}px</button>
+            <button class="copy-btn" data-copy={s.name}>{s.name}</button>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <p class="section-label" style="margin-top:40px">Variables CSS</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={`:root {\n${spacing.map(s=>`  --espaciado-${s.name.split('/')[1]}: ${s.value}px;`).join('\n')}\n}`}>Copiar todo</button>
+    <pre>{`:root {\n${spacing.map(s=>`  --espaciado-${s.name.split('/')[1]}: ${s.value}px;`).join('\n')}\n}`}</pre>
+  </div>
+</Layout>
+
+<style is:global>
+  .spacing-list { display: flex; flex-direction: column; gap: 8px; }
+  .spacing-row {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 14px 20px; display: flex; align-items: center; gap: 20px;
+    box-shadow: var(--shadow-low);
+  }
+  .sp-bar-wrap { width: 200px; flex-shrink: 0; display: flex; align-items: center; }
+  .sp-bar { background: var(--prim-500); border-radius: 3px; opacity: .8; min-width: 4px; }
+  .sp-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .sp-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .mono { font-family: 'Courier New', monospace; font-size: 12px; color: var(--txt-tertiary); }
+</style>

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.astro/
+*.log
+.DS_Store
+
+# Datos de clientes y salidas generadas del DocSite: no se suben
+dsgbr-docsite-template/entrada/*
+!dsgbr-docsite-template/entrada/.gitkeep
+dsgbr-docsite-template/public/descargas/
+dsgbr-docsite-template/public/componentes/
+dsgbr-docsite-template/tokens/
+dsgbr-docsite-template/build/
+dsgbr-docsite-template/docsite.config.json
+
+# Copias de trabajo y paquetes
+paquete-docsite-*/
+versiones/
+*.tar.gz
+*.tgz
+*.zip

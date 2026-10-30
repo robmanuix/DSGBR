@@ -1,0 +1,8 @@
+{
+  "cliente": "Proyecto de muestra",
+  "marca": "Muestra",
+  "base": "calma",
+  "plataformas": ["web", "ios", "android"],
+  "version": "0.1.0",
+  "generado": "2026-10-29"
+}

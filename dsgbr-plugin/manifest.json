@@ -1,0 +1,13 @@
+{
+  "name": "DSGBR",
+  "id": "0000000000000000000",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["https://api.anthropic.com"],
+    "reasoning": "Lee el brief y el manual de marca con la API de Claude (opcional, con la clave del usuario). Más adelante se añadirá api.github.com."
+  }
+}

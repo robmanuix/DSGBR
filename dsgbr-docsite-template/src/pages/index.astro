@@ -1,0 +1,141 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { config } from '../lib/tokens';
+const iniciales = (config.marca ?? 'DS').split(/\s+/).map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<Layout title="Dashboard" section="dashboard">
+  <div class="hero">
+    <div class="hero-glow"></div>
+
+    <div class="hero-badge">{iniciales}</div>
+
+    <h1 class="hero-title">{config.cliente ?? 'Sistema de Diseño'}</h1>
+    <p class="hero-meta">v{config.version} &nbsp;·&nbsp; base {config.base} &nbsp;·&nbsp; {String(config.generado ?? '').slice(0, 4)}</p>
+
+    <div class="hero-links">
+      <a href={`${base}/tokens/colors`} class="hero-link">
+        <span class="hero-link-name">
+          Tokens
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="hero-link-desc">Colores, tipografía, espaciado y radios de borde.</span>
+      </a>
+
+      <a href={`${base}/components/buttons`} class="hero-link">
+        <span class="hero-link-name">
+          Components
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="hero-link-desc">Botones, campos, selecciones y notificaciones.</span>
+      </a>
+
+      <a href={`${base}/support`} class="hero-link">
+        <span class="hero-link-name">
+          Support us
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="hero-link-desc">Archivo Figma, recursos y contribuciones.</span>
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 56px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 520px;
+    height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(81,163,163,0.10) 0%, transparent 62%);
+    pointer-events: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -54%);
+  }
+
+  .hero-badge {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, var(--color-brand-500) 0%, var(--color-brand-800) 100%);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(81,163,163,0.28);
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    color: #151a1f;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    line-height: 1.1;
+    position: relative;
+  }
+
+  .hero-meta {
+    font-size: 13px;
+    color: #9ea3ab;
+    margin-bottom: 80px;
+    position: relative;
+  }
+
+  .hero-links {
+    display: flex;
+    gap: 52px;
+    justify-content: center;
+    position: relative;
+  }
+
+  .hero-link {
+    text-decoration: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 188px;
+    transition: opacity .15s;
+  }
+  .hero-link:hover { opacity: .6; }
+
+  .hero-link-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #151a1f;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .hero-link-desc {
+    font-size: 13px;
+    color: #727880;
+    line-height: 1.5;
+  }
+</style>

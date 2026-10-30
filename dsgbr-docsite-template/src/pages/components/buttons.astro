@@ -1,0 +1,253 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',      id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',  id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',   id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',      href: '/components/figma',        id: 'figma' },
+];
+
+const sharedIcons = [
+  { key: 'plus',     title: 'Más',        svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2V12M2 7H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>' },
+  { key: 'check',    title: 'Confirmar',  svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'download', title: 'Descargar',  svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2V9M4 7L7 10L10 7M2 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'trash',    title: 'Eliminar',   svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2H9V4M4 4L4.5 12H9.5L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { key: 'upload',   title: 'Subir',      svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 9V2M4 4L7 1L10 4M2 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+];
+const leftIcons = [
+  { key: 'arrow-left',  title: 'Flecha izq.', svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7H2M2 7L6 3M2 7L6 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  ...sharedIcons,
+];
+const rightIcons = [
+  { key: 'arrow-right', title: 'Flecha der.', svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  ...sharedIcons,
+];
+
+const cssCode = `.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; border: none; cursor: pointer; font-family: inherit;
+  font-weight: 500; transition: background .15s, opacity .15s;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+/* Tamaños */
+.btn-lg { padding: 14px 24px; font-size: 16px; border-radius: 4px; min-height: 52px; }
+.btn-md { padding: 12px 20px; font-size: 14px; border-radius: 4px; min-height: 44px; }
+.btn-sm { padding:  8px 16px; font-size: 13px; border-radius: 4px; min-height: 36px; }
+/* Tipos */
+.btn-primary   { background: var(--color-brand-500); color: var(--color-content-primary-inverse); }
+.btn-primary:hover:not(:disabled)   { background: var(--color-brand-600); }
+.btn-secondary { background: var(--sec-500); color: var(--color-content-primary); }
+.btn-secondary:hover:not(:disabled) { background: var(--sec-600); }
+.btn-outline   { background: transparent; color: var(--color-brand-600); border: 1.5px solid var(--color-brand-500); }
+.btn-outline:hover:not(:disabled)   { background: var(--color-brand-100); }
+.btn-danger    { background: var(--color-background-negative); color: var(--color-content-primary-inverse); }
+.btn-danger:hover:not(:disabled)    { background: var(--color-background-negative-hover); }`;
+---
+<Layout title="Botones" section="components" subNav={subNav} pageTitle="Botones" pageDesc="180 variantes — Tipo (4) × Estado (5) × Tamaño (3).">
+
+  <p class="section-label">Constructor</p>
+  <div class="builder">
+
+    <div class="builder-panel">
+      <p class="builder-panel-title">Propiedades</p>
+
+      <div class="prop-group">
+        <span class="prop-label">Tipo</span>
+        <div class="prop-pills" id="p-type">
+          <button class="pill active" data-value="primary">Primario</button>
+          <button class="pill" data-value="secondary">Secundario</button>
+          <button class="pill" data-value="outline">Outline</button>
+          <button class="pill" data-value="danger">Peligro</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Tamaño</span>
+        <div class="prop-pills" id="p-size">
+          <button class="pill" data-value="lg">Grande</button>
+          <button class="pill active" data-value="md">Mediano</button>
+          <button class="pill" data-value="sm">Pequeño</button>
+        </div>
+      </div>
+
+      <div class="prop-group">
+        <span class="prop-label">Etiqueta</span>
+        <input class="prop-input" id="p-label" type="text" value="Confirmar" />
+      </div>
+
+      <!-- Ícono izquierdo -->
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Ícono izquierdo</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-icon-left-show" />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <div id="p-icon-left-picker" class="icon-picker" style="display:none">
+          {leftIcons.map((ic, i) => (
+            <button class:list={['icon-pill', { active: i === 0 }]} data-key={ic.key} title={ic.title} set:html={ic.svg} />
+          ))}
+        </div>
+      </div>
+
+      <!-- Ícono derecho -->
+      <div class="prop-group">
+        <div class="prop-inline">
+          <span class="prop-label">Ícono derecho</span>
+          <label class="ctrl-toggle">
+            <input type="checkbox" id="p-icon-right-show" />
+            <span class="ctrl-track"></span>
+          </label>
+        </div>
+        <div id="p-icon-right-picker" class="icon-picker" style="display:none">
+          {rightIcons.map((ic, i) => (
+            <button class:list={['icon-pill', { active: i === 0 }]} data-key={ic.key} title={ic.title} set:html={ic.svg} />
+          ))}
+        </div>
+      </div>
+
+      <div class="prop-group prop-row">
+        <span class="prop-label">Deshabilitado</span>
+        <label class="ctrl-toggle">
+          <input type="checkbox" id="p-disabled" />
+          <span class="ctrl-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="builder-preview">
+      <button id="comp-preview" class="btn btn-primary btn-md">Confirmar</button>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:24px">Propiedades del componente</p>
+  <table class="ds-table" style="margin-bottom:24px">
+    <thead><tr><th>Propiedad</th><th>Valores</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td>Type</td><td>Primario · Secundario · Outline · Peligro</td><td>Primario</td></tr>
+      <tr><td>Size</td><td>Grande · Mediano · Pequeño</td><td>Mediano</td></tr>
+      <tr><td>State</td><td>Default · Hover · Active · Focus · Disabled</td><td>Default</td></tr>
+      <tr><td>Label</td><td>String</td><td>Confirmar</td></tr>
+      <tr><td>Left Icon</td><td>Instance swap (6 iconos)</td><td>—</td></tr>
+      <tr><td>View Left Icon</td><td>Boolean</td><td>false</td></tr>
+      <tr><td>Right Icon</td><td>Instance swap (6 iconos)</td><td>—</td></tr>
+      <tr><td>View Right Icon</td><td>Boolean</td><td>false</td></tr>
+    </tbody>
+  </table>
+
+  <p class="section-label">HTML generado</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-copy">Copiar</button>
+    <pre id="comp-code"></pre>
+  </div>
+
+  <p class="section-label">CSS completo</p>
+  <div class="code-block">
+    <button class="copy-btn" data-copy={cssCode}>Copiar</button>
+    <pre>{cssCode}</pre>
+  </div>
+
+</Layout>
+
+<style is:global>
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; cursor:pointer; font-family:inherit; font-weight:500; transition:background .15s,opacity .15s; text-decoration:none; white-space:nowrap; }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .btn-lg { padding:14px 24px; font-size:16px; border-radius:4px; min-height:52px; }
+  .btn-md { padding:12px 20px; font-size:14px; border-radius:4px; min-height:44px; }
+  .btn-sm { padding:8px 16px; font-size:13px; border-radius:4px; min-height:36px; }
+  .btn-primary   { background:var(--color-brand-500); color:var(--color-content-primary-inverse); }
+  .btn-primary:hover:not(:disabled)  { background:var(--color-brand-600); }
+  .btn-primary:active:not(:disabled) { background:var(--color-brand-700); }
+  .btn-secondary { background:var(--sec-500); color:var(--color-content-primary); }
+  .btn-secondary:hover:not(:disabled){ background:var(--sec-600); }
+  .btn-outline   { background:transparent; color:var(--color-brand-600); border:1.5px solid var(--color-brand-500); }
+  .btn-outline:hover:not(:disabled)  { background:var(--color-brand-100); }
+  .btn-danger    { background:var(--color-background-negative); color:var(--color-content-primary-inverse); }
+  .btn-danger:hover:not(:disabled)   { background:var(--color-background-negative-hover); }
+</style>
+
+<script>
+  function getIconSvg(pickerId: string): string {
+    const active = document.querySelector(`#${pickerId} .icon-pill.active`);
+    return active?.innerHTML?.trim() ?? '';
+  }
+
+  function update() {
+    const type     = (document.querySelector('#p-type .pill.active') as HTMLElement)?.dataset.value ?? 'primary';
+    const size     = (document.querySelector('#p-size .pill.active') as HTMLElement)?.dataset.value ?? 'md';
+    const label    = (document.getElementById('p-label') as HTMLInputElement).value || 'Confirmar';
+    const disabled = (document.getElementById('p-disabled') as HTMLInputElement).checked;
+    const showL    = (document.getElementById('p-icon-left-show') as HTMLInputElement).checked;
+    const showR    = (document.getElementById('p-icon-right-show') as HTMLInputElement).checked;
+    const leftSvg  = showL ? getIconSvg('p-icon-left-picker') : '';
+    const rightSvg = showR ? getIconSvg('p-icon-right-picker') : '';
+
+    // Preview
+    const preview = document.getElementById('comp-preview') as HTMLButtonElement;
+    preview.className = `btn btn-${type} btn-${size}`;
+    preview.disabled = disabled;
+    preview.innerHTML = `${leftSvg}${label}${rightSvg}`;
+
+    // Code
+    const disAttr = disabled ? ' disabled' : '';
+    let code: string;
+    if (leftSvg || rightSvg) {
+      const lines = [];
+      if (leftSvg)  lines.push(`  ${leftSvg}`);
+      lines.push(`  ${label}`);
+      if (rightSvg) lines.push(`  ${rightSvg}`);
+      code = `<button class="btn btn-${type} btn-${size}"${disAttr}>\n${lines.join('\n')}\n</button>`;
+    } else {
+      code = `<button class="btn btn-${type} btn-${size}"${disAttr}>${label}</button>`;
+    }
+    (document.getElementById('comp-code') as HTMLElement).textContent = code;
+  }
+
+  // Pill groups
+  document.querySelectorAll('#p-type .pill, #p-size .pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.closest('.prop-pills')!.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  // Icon pickers selection
+  document.querySelectorAll('#p-icon-left-picker .icon-pill, #p-icon-right-picker .icon-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.closest('.icon-picker')!.querySelectorAll('.icon-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      update();
+    });
+  });
+
+  // Toggle icon visibility
+  (document.getElementById('p-icon-left-show') as HTMLInputElement).addEventListener('change', e => {
+    const show = (e.target as HTMLInputElement).checked;
+    (document.getElementById('p-icon-left-picker') as HTMLElement).style.display = show ? 'flex' : 'none';
+    update();
+  });
+  (document.getElementById('p-icon-right-show') as HTMLInputElement).addEventListener('change', e => {
+    const show = (e.target as HTMLInputElement).checked;
+    (document.getElementById('p-icon-right-picker') as HTMLElement).style.display = show ? 'flex' : 'none';
+    update();
+  });
+
+  (document.getElementById('p-label') as HTMLInputElement).addEventListener('input', update);
+  (document.getElementById('p-disabled') as HTMLInputElement).addEventListener('change', update);
+
+  document.getElementById('comp-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  update();
+</script>

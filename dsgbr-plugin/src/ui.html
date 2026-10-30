@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font: 12px/1.5 Inter, system-ui, sans-serif; margin: 0; padding: 4px 16px 16px; color: #111; }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; }
+  input[type=text], select, textarea { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  textarea { height: 64px; resize: vertical; }
+  .opciones { display: flex; gap: 14px; flex-wrap: wrap; } .opciones label { font-weight: 400; margin: 0; display: flex; gap: 4px; align-items: center; }
+  .color { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; } .color input[type=color] { width: 40px; height: 34px; padding: 0; border: 1px solid #ccc; border-radius: 6px; flex: none; } .color .n { flex: 1; min-width: 0; } .color .h { width: 84px; flex: none; } .color button { padding: 4px 8px; flex: none; }
+  .nota { color: #666; font-size: 11px; margin-top: 4px; }
+  .fila { display: flex; gap: 8px; margin: 16px 0 0; }
+  button { padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; font: inherit; }
+  button.p { background: #3366e6; color: #fff; border-color: #3366e6; flex: 1; }
+  #estado, #salida { margin-top: 12px; padding: 8px; border-radius: 6px; background: #f5f5f5; white-space: pre-wrap; }
+  #salida:empty { display: none; }
+  details.ia { border: 1px solid #d9def0; border-radius: 8px; padding: 8px 10px; margin-top: 12px; background: #f7f9ff; }
+  details.ia summary { cursor: pointer; font-weight: 600; }
+  details.ia input[type=password], details.ia input[type=file] { width: 100%; box-sizing: border-box; font: inherit; margin-top: 4px; }
+  details.ia input[type=password] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+  #ia-res, #aa-res { margin-top: 8px; padding: 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ee; white-space: pre-wrap; font-size: 11px; }
+  #ia-res:empty { display: none; }
+  .ok { color: #14803c; } .mal { color: #b42318; }
+
+  /* ---- Pantalla de carga (splash) ---- */
+  #splash { position: fixed; inset: 0; background: #fff; z-index: 100; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: opacity .5s ease; }
+  #splash.fuera { opacity: 0; pointer-events: none; }
+  #barras { position: absolute; inset: 0; display: flex; transition: filter .9s ease, opacity .9s ease; }
+  #barras.difuminar { filter: blur(22px); opacity: 0; }
+  #barras i { flex: 1; transform: translateY(-101%); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+  #barras.entrar i { transform: translateY(0); }
+  #marca { position: relative; display: flex; flex-direction: column; align-items: center; gap: 22px; opacity: 0; transform: scale(.85); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  #marca.ver { opacity: 1; transform: scale(1); }
+  #giro { width: 26px; height: 26px; border: 3px solid #e3e6ee; border-top-color: #3366e6; border-radius: 50%; opacity: 0; transition: opacity .4s ease; animation: gira .8s linear infinite; }
+  #giro.ver { opacity: 1; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #barras, #barras i, #marca { transition: none; } #giro { animation-duration: 2s; } }
+</style>
+</head>
+<body>
+<div id="splash" aria-label="Cargando DSGBR">
+  <div id="barras"></div>
+  <div id="marca"><svg width="96" height="96" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<path style="fill:#29B4D5;" d="M257.568,101.234l-2.215,2.214L34.093,324.709c-7.574,7.574-7.58,19.856-0.006,27.43l82.277,82.277c7.574,7.574,19.865,7.575,27.437,0.001l111.553-111.553l111.922-111.922c23.465-23.465,23.467-61.661,0.001-85.126l-24.592-24.592C319.22,77.758,281.034,77.767,257.568,101.234z"/>
+<path style="fill:#4DD1E8;" d="M257.568,101.234l-2.215,2.214l-39.332,39.332l39.331,39.331l70.377,70.377l41.546-41.546c23.465-23.465,23.467-61.661,0.001-85.126l-24.59-24.592C319.22,77.758,281.034,77.767,257.568,101.234z"/>
+<path style="fill:#6A81B5;" d="M34.093,324.709c-7.574,7.574-7.58,19.856-0.006,27.43l82.277,82.277c7.574,7.574,19.865,7.575,27.437,0.001l98.733-98.733L132.825,225.974L34.093,324.709z"/>
+<path style="fill:#F66131;" d="M451.805,298.667H135.764c-10.711,0-19.4,8.679-19.4,19.391v116.358c0,10.709,8.69,19.402,19.4,19.402h316.041c33.186,0,60.195-27.007,60.195-60.192v-34.78C512,325.662,484.991,298.667,451.805,298.667z"/>
+<path style="fill:#C61623;" d="M135.764,298.667c-10.711,0-19.4,8.679-19.4,19.391v116.358c0,10.709,8.69,19.402,19.4,19.402h139.63V298.667H135.764z"/>
+<path style="fill:#FFCC73;" d="M451.805,298.667h-58.755v155.152h58.755c33.186,0,60.195-27.007,60.195-60.192v-34.78C512,325.662,484.991,298.667,451.805,298.667z"/>
+<path style="fill:#E6E6E6;" d="M94.975,58.182h-34.78C27.009,58.182,0,85.189,0,118.374v316.041c0,10.711,8.695,19.403,19.406,19.403h116.358c10.711,0,19.387-8.692,19.387-19.403V118.374C155.152,85.189,128.16,58.182,94.975,58.182z"/>
+<path style="fill:#CFCFCF;" d="M94.975,58.182H76.958v395.636h58.806c10.711,0,19.387-8.692,19.387-19.403V118.374C155.152,85.189,128.16,58.182,94.975,58.182z"/>
+<circle style="fill:#263B74;" cx="77.179" cy="376.773" r="19.394"/>
+</svg>
+<div id="giro"></div></div>
+</div>
+
+  <details class="ia" id="ia">
+    <summary>Leer brief y manual de marca con IA (opcional)</summary>
+    <label for="ia-archivos">Documentos PDF</label>
+    <input id="ia-archivos" type="file" accept="application/pdf" multiple>
+    <label for="ia-clave">Clave de la API de Claude</label>
+    <input id="ia-clave" type="password" placeholder="sk-ant-..." autocomplete="off">
+    <label class="opciones" style="font-weight:400"><input type="checkbox" id="ia-recordar" checked> Recordar la clave en este equipo</label>
+    <div class="nota">Los PDF se envían a la API de Anthropic solo para leerlos. Si un documento es confidencial, no uses esta opción y llena el formulario a mano. La IA propone; tú revisas antes de aplicar.</div>
+    <div class="fila"><button id="ia-leer" class="p" type="button">Leer documentos y rellenar</button></div>
+    <div id="ia-res"></div>
+  </details>
+
+  <label for="cliente">Nombre del cliente</label>
+  <input id="cliente" type="text" placeholder="Mi Menú">
+
+  <label for="versionDS">Versión del sistema</label>
+  <div class="fila" style="margin-top:0"><input id="versionDS" type="text" placeholder="1.0.0" style="flex:1"><button id="v-p" type="button" title="Parche: correcciones">+ parche</button><button id="v-m" type="button" title="Menor: cambios compatibles">+ menor</button><button id="v-M" type="button" title="Mayor: cambios que rompen">+ mayor</button></div>
+  <div class="nota">Aparece en el DocSite y en el Resumen. Se guarda en el archivo; sube la versión cada vez que publiques cambios.</div>
+
+  <label>Colores de marca</label>
+  <div id="colores"></div>
+  <button id="mas" type="button" style="margin-top:8px">+ Agregar color</button>
+  <div class="nota">El primero es el principal (se usa para los roles y el contraste); puedes cambiarle el nombre y su rampa se renombra sola. Cada color genera una rampa de 9 pasos.</div>
+
+  <label for="tipografia">Tipografía de la marca</label>
+  <input id="tipografia" type="text" list="familias" placeholder="Ej.: Poppins (vacío = no cambiar)" autocomplete="off">
+  <datalist id="familias"></datalist>
+  <div class="nota" id="tipo-nota">Escribe el nombre exacto de la fuente (Google Fonts o instalada). Actualiza todos los estilos de texto.</div>
+
+  <label for="base">Base de diseño</label>
+  <select id="base">
+    <option value="calma">Calma</option>
+    <option value="expresiva">Expresiva</option>
+    <option value="utilitaria">Utilitaria</option>
+  </select>
+  <div class="nota" id="base-nota"></div>
+
+  <label>Plataformas</label>
+  <div class="opciones">
+    <label><input type="checkbox" id="p-web" checked> Web</label>
+    <label><input type="checkbox" id="p-ios" checked> iOS</label>
+    <label><input type="checkbox" id="p-android" checked> Android</label>
+  </div>
+
+  <details class="ia" id="brief" style="margin-top:12px">
+    <summary>Resumen y tono de voz (opcional)</summary>
+    <div class="nota" style="margin-top:6px">Se escriben en las páginas «Resumen» y «Contenido y tono» y en el nombre del logo. Los campos vacíos dejan el marcador del archivo.</div>
+    <label for="b-sector">Sector</label>
+    <input id="b-sector" type="text">
+    <label for="b-propuesta">Propuesta de valor</label>
+    <textarea id="b-propuesta" rows="2"></textarea>
+    <label for="b-publico">Público objetivo</label>
+    <textarea id="b-publico" rows="2"></textarea>
+    <label for="b-idioma">Idioma principal</label>
+    <input id="b-idioma" type="text">
+    <label for="b-voz">Voz de marca (adjetivos)</label>
+    <input id="b-voz" type="text">
+    <label for="b-tono">Tono en interfaz</label>
+    <input id="b-tono" type="text">
+    <label for="b-tratamiento">Tratamiento (tú / usted)</label>
+    <input id="b-tratamiento" type="text">
+    <label for="b-mayusculas">Mayúsculas en botones</label>
+    <input id="b-mayusculas" type="text">
+    <label for="b-errores">Guía para mensajes de error</label>
+    <textarea id="b-errores" rows="2"></textarea>
+    <label for="b-evitar">Palabras a evitar</label>
+    <input id="b-evitar" type="text">
+    <label for="b-ejemploBoton">Ejemplo de botón principal</label>
+    <input id="b-ejemploBoton" type="text">
+    <label for="b-ejemploVacio">Ejemplo de estado vacío</label>
+    <textarea id="b-ejemploVacio" rows="2"></textarea>
+  </details>
+
+  <label for="extras">Páginas adicionales (una por línea)</label>
+  <textarea id="extras" placeholder="Voz y tono&#10;Fotografía"></textarea>
+  <div class="nota">Se crean dentro de «Brief y marca». Las páginas estándar que falten también se crean.</div>
+
+  <label class="opciones" style="font-weight:400"><input type="checkbox" id="quitar"> Quitar las páginas de las plataformas no elegidas</label>
+
+  <div class="fila">
+    <button id="ver">Verificar</button>
+    <button id="aplicar" class="p">Crear estructura y aplicar marca</button>
+  </div>
+  <div id="estado">Sin verificar.</div>
+  <details class="ia" id="aa" style="margin-top:12px">
+    <summary>Contraste de los roles (AA)</summary>
+    <div class="nota" style="margin-top:6px">Revisa los colores reales de este archivo en Claro y Oscuro: texto sobre fondo (4,5:1) y bordes (3:1). «Corregir» mueve un paso en su rampa los roles de texto y borde que fallan; no toca Contenido/Primario ni los fondos.</div>
+    <div class="fila"><button id="aa-ver" type="button">Auditar</button><button id="aa-fix" class="p" type="button">Corregir</button></div>
+    <div id="aa-res" style="margin-top:8px"></div>
+  </details>
+  <details class="ia" id="exp" style="margin-top:12px">
+    <summary>Exportar tokens (web, iOS y Android)</summary>
+    <div class="nota" style="margin-top:6px">Genera los archivos a partir de las variables de este archivo de Figma: JSON W3C, CSS, Tailwind v4, Swift y Kotlin. Los nombres salen de la sintaxis de código de cada variable.</div>
+    <div class="fila"><button id="exp-gen" class="p" type="button">Generar archivos</button><button id="exp-img" type="button">Imágenes de componentes</button></div>
+    <div id="exp-lista" style="margin-top:8px"></div>
+  </details>
+  <div id="salida"></div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const enviar = (m) => parent.postMessage({ pluginMessage: m }, '*');
+  const NOMBRES = ['Brand', 'Secondary', 'Tertiary'];
+  const agregar = (nombre, hex) => {
+    const i = $('colores').children.length;
+    const fila = document.createElement('div'); fila.className = 'color';
+    fila.innerHTML = '<input type="color" class="c"><input type="text" class="n" placeholder="Nombre"><input type="text" class="h" maxlength="7">' + (i ? '<button type="button" title="Quitar">×</button>' : '');
+    const c = fila.querySelector('.c'), n = fila.querySelector('.n'), h = fila.querySelector('.h');
+    n.value = nombre || NOMBRES[i] || 'Color ' + (i + 1); h.value = (hex || '#3366E6').toUpperCase(); c.value = h.value.toLowerCase();
+    c.oninput = () => { h.value = c.value.toUpperCase(); };
+    h.oninput = () => { if (/^#[0-9A-Fa-f]{6}$/.test(h.value)) c.value = h.value; };
+    const q = fila.querySelector('button'); if (q) q.onclick = () => fila.remove();
+    $('colores').appendChild(fila);
+  };
+  const NOTAS = {
+    calma: 'Radios grandes, sombras suaves, espacio aireado, movimiento sutil. Para SaaS, servicios y salud.',
+    expresiva: 'Radios muy redondeados, sombras mínimas, movimiento con rebote. Para marcas con personalidad.',
+    utilitaria: 'Radios pequeños, casi sin sombra, espacio compacto, movimiento mínimo. Para dashboards y paneles.',
+  };
+  $('base').onchange = () => { $('base-nota').textContent = NOTAS[$('base').value]; };
+  $('base').onchange();
+  $('mas').onclick = () => agregar();
+  agregar('Brand', '#3366E6');
+  const leerColores = () => [...$('colores').children].map((f) => ({ nombre: f.querySelector('.n').value.trim(), hex: f.querySelector('.h').value.trim() }));
+  const BRIEF = ["sector", "propuesta", "publico", "idioma", "voz", "tono", "tratamiento", "mayusculas", "errores", "evitar", "ejemploBoton", "ejemploVacio"];
+  const leerBrief = () => { const b = {}; BRIEF.forEach((k) => { const v = $('b-' + k).value.trim(); if (v) b[k] = v; }); return b; };
+  const ponerBrief = (b) => { BRIEF.forEach((k) => { if (b && b[k]) $('b-' + k).value = b[k]; }); };
+  const listaAA = (f) => f.map((p) => '• ' + p.rol + ' sobre ' + p.sobre + ' (' + (p.modo === 'claro' ? 'Claro' : 'Oscuro') + '): ' + p.ratio + ':1, mínimo ' + p.minimo + ':1').join('\n');
+  $('aa-ver').onclick = () => { $('aa-res').textContent = 'Auditando…'; enviar({ tipo: 'auditar' }); };
+  $('aa-fix').onclick = () => { $('aa-res').textContent = 'Corrigiendo…'; enviar({ tipo: 'corregirContraste' }); };
+  const subir = (t) => { const p = ($('versionDS').value.trim() || '1.0.0').split('.').map(Number); if (p.length !== 3 || p.some(isNaN)) return; if (t === 'M') p.splice(0, 3, p[0] + 1, 0, 0); else if (t === 'm') p.splice(1, 2, p[1] + 1, 0); else p[2]++; $('versionDS').value = p.join('.'); };
+  $('v-p').onclick = () => subir('p'); $('v-m').onclick = () => subir('m'); $('v-M').onclick = () => subir('M');
+  $('ver').onclick = () => enviar({ tipo: 'verificar' });
+  $('aplicar').onclick = () => {
+    const plataformas = ['web', 'ios', 'android'].filter((p) => $('p-' + p).checked);
+    enviar({ tipo: 'aplicar', datos: {
+      cliente: $('cliente').value.trim(), colores: leerColores(), base: $('base').value, plataformas,
+      extras: $('extras').value.split('\n').map((s) => s.trim()).filter(Boolean),
+      quitarSobrantes: $('quitar').checked, tipografia: $('tipografia').value.trim(), brief: leerBrief(), versionDS: $('versionDS').value.trim(),
+    } });
+  };
+  onmessage = (e) => {
+    const m = e.data.pluginMessage; if (!m) return;
+    if (m.tipo === 'estado') {
+      $('estado').innerHTML = m.esMaestro
+        ? '<span class="ok">Es un maestro DSGBR</span> (' + m.colecciones + ' colecciones, ' + m.paginas + ' páginas)'
+        : '<span class="mal">No es un maestro DSGBR.</span> Faltan: ' + m.faltan.join(', ');
+    }
+    if (m.tipo === 'exportado') { ARCHIVOS = m.archivos; pintarArchivos(); }
+    if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); }
+    if (m.tipo === 'clave' && m.clave) { $('ia-clave').value = m.clave; }
+    if (m.tipo === 'fuentes') {
+      $('familias').innerHTML = m.familias.map((f) => '<option value="' + f.replace(/"/g, '&quot;') + '">').join('');
+      if (m.actual && !$('tipografia').value) $('tipografia').placeholder = 'Actual: ' + m.actual;
+    }
+    if (m.tipo === 'guardado' && m.datos) {
+      $('aplicar').textContent = 'Guardar y actualizar';
+      if (m.datos.tipografia) $('tipografia').value = m.datos.tipografia;
+      ponerBrief(m.datos.brief);
+      if (m.datos.versionDS) $('versionDS').value = m.datos.versionDS;
+      $('cliente').value = m.datos.cliente; $('base').value = m.datos.base; $('base').onchange(); $('colores').innerHTML = ''; (m.datos.colores || [{ nombre: 'Brand', hex: m.datos.hex }]).forEach((c) => agregar(c.nombre, c.hex));
+      ['web', 'ios', 'android'].forEach((p) => { $('p-' + p).checked = m.datos.plataformas.includes(p); });
+      $('extras').value = (m.datos.extras || []).join('\n');
+    }
+    if (m.tipo === 'aplicado') {
+      $('aplicar').textContent = 'Guardar y actualizar';
+      const f = [...m.contraste.claro, ...m.contraste.oscuro].filter((c) => !c.cumple);
+      $('salida').innerHTML = m.escritas + ' variables de color escritas (' + m.nuevas + ' nuevas).<br>' +
+        m.creadas.length + ' páginas creadas' + (m.creadas.length ? ': ' + m.creadas.join(', ') : '') + '.<br>' +
+        (m.quitadas.length ? m.quitadas.length + ' páginas quitadas.<br>' : '') +
+        'Base «' + m.baseAplicada.base + '» aplicada (' + m.baseAplicada.cambios + ' valores: forma, espaciado, elevación, movimiento).<br>' + (m.auditoria && m.auditoria.fallos.length ? '<span class="mal">' + m.auditoria.fallos.length + ' pares reales sin AA: abre «Contraste de los roles».</span><br>' : '') + (m.briefRes ? m.briefRes.campos + ' campos de Brief y marca escritos.<br>' : '') + (m.rolesNuevos ? m.rolesNuevos + ' roles semánticos nuevos para los colores adicionales.<br>' : '') + (m.fuente ? 'Tipografía: ' + m.fuente.familia + ' (' + m.fuente.regular + ' / ' + m.fuente.seminegrita + ').<br>' : '') +
+        (f.length ? '<span class="mal">' + f.length + ' pares sin contraste AA</span>' : '<span class="ok">Todos los pares cumplen AA (claro y oscuro)</span>');
+    }
+    if (m.tipo === 'auditoria') {
+      $('aa').open = true;
+      $('aa-res').innerHTML = m.fallos.length
+        ? '<span class="mal">' + m.fallos.length + ' de ' + m.total + ' pares no cumplen:</span>\n' + listaAA(m.fallos)
+        : '<span class="ok">Los ' + m.total + ' pares cumplen AA (claro y oscuro).</span>';
+    }
+    if (m.tipo === 'corregido') {
+      $('aa').open = true;
+      $('aa-res').innerHTML = (m.cambios.length ? '<span class="ok">' + m.cambios.length + ' ajustes:</span>\n• ' + m.cambios.join('\n• ') : 'No había nada que ajustar solo.') +
+        (m.restantes.length ? '\n\n<span class="mal">Siguen sin cumplir ' + m.restantes.length + ' (revísalos a mano):</span>\n' + listaAA(m.restantes) : '\n\n<span class="ok">Todos los pares cumplen AA.</span>');
+    }
+    if (m.tipo === 'error') { $('exp-lista').textContent = ''; $('salida').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; }
+  };
+
+
+  // IA:inicio
+  const IA_MODELO = 'claude-sonnet-5-5';
+  const IA_HERRAMIENTA = {
+    name: 'extraer_marca',
+    description: 'Registra los datos de marca encontrados en el brief y el manual de marca.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        cliente: { type: 'string', description: 'Nombre de la marca o cliente' },
+        colores: { type: 'array', description: 'Colores de marca; el principal primero', items: { type: 'object', properties: {
+          nombre: { type: 'string', description: 'Nombre corto en inglés sin «/», p. ej. Brand, Secondary, Accent, o el nombre que use el manual' },
+          hex: { type: 'string', description: 'Hex de 6 dígitos con #' },
+          aproximado: { type: 'boolean', description: 'true si el manual solo daba Pantone, CMYK o RGB y el hex es una conversión' },
+        }, required: ['nombre', 'hex'] } },
+        tipografia: { type: 'string', description: 'Familia tipográfica principal exacta (idealmente de Google Fonts); vacío si no aparece' },
+        base: { type: 'string', enum: ['calma', 'expresiva', 'utilitaria'], description: 'Base de diseño que mejor encaja con el tono y el tipo de producto' },
+        motivo_base: { type: 'string' },
+        plataformas: { type: 'array', items: { type: 'string', enum: ['web', 'ios', 'android'] } },
+        tono: { type: 'string', description: 'Resumen del tono de la marca en una frase' },
+        resumen: { type: 'object', description: 'Datos del brief; omite lo que no aparezca', properties: {
+          sector: { type: 'string' }, propuesta: { type: 'string', description: 'Propuesta de valor en 1-2 frases' }, publico: { type: 'string', description: 'Público objetivo en 1-2 frases' },
+          idioma: { type: 'string' }, voz: { type: 'string', description: 'Adjetivos de la voz de marca, separados por comas' },
+          tono: { type: 'string', description: 'Tono en la interfaz: cercano, formal o técnico' }, tratamiento: { type: 'string', description: 'Tú, usted u otro' },
+          mayusculas: { type: 'string', description: 'Cómo se escriben los botones (tipo oración, título, mayúsculas)' }, errores: { type: 'string', description: 'Guía de redacción de errores si el manual la trae' },
+          evitar: { type: 'string', description: 'Palabras o expresiones a evitar' },
+        } },
+        advertencias: { type: 'array', items: { type: 'string' }, description: 'Dudas, datos que faltan o contradicciones entre documentos' },
+      },
+      required: ['cliente', 'colores', 'base', 'advertencias'],
+    },
+  };
+  const IA_PROMPT = 'Eres un asistente de diseño de sistemas. Lee los documentos adjuntos (brief y manual de marca) y registra con la herramienta solo lo que esté en ellos. ' +
+    'No inventes: si un dato no aparece, déjalo vacío y anótalo en advertencias. Los colores van como hex; si solo hay Pantone, CMYK o RGB, conviértelos y marca aproximado. ' +
+    'El color principal va primero. Elige la base (calma, expresiva o utilitaria) según el tipo de producto y el tono, y explica el motivo en una frase. Responde en español.';
+  const normalizarHex = (h) => { h = String(h || '').trim(); if (/^[0-9a-fA-F]{6}$/.test(h)) h = '#' + h; return /^#[0-9a-fA-F]{6}$/.test(h) ? h.toUpperCase() : null; };
+  function normalizarMarca(inp) {
+    const avisos = [...(inp.advertencias || [])];
+    const usados = new Set(), colores = [];
+    for (const c of (inp.colores || []).slice(0, 6)) {
+      const hex = normalizarHex(c.hex);
+      let nombre = String(c.nombre || '').replace(/\//g, ' ').trim() || ('Color ' + (colores.length + 1));
+      if (!hex) { avisos.push('Se omitió el color «' + nombre + '»: hex no válido.'); continue; }
+      while (usados.has(nombre.toLowerCase())) nombre += ' 2';
+      usados.add(nombre.toLowerCase());
+      if (c.aproximado) avisos.push('«' + nombre + '» (' + hex + ') es una conversión aproximada: confírmala con el manual.');
+      colores.push({ nombre, hex });
+    }
+    if (!colores.length) avisos.push('No se encontró ningún color válido.');
+    const base = ['calma', 'expresiva', 'utilitaria'].includes(inp.base) ? inp.base : 'calma';
+    const plataformas = (inp.plataformas || []).filter((p) => ['web', 'ios', 'android'].includes(p));
+    return { cliente: String(inp.cliente || '').trim(), colores, tipografia: String(inp.tipografia || '').trim(), base, motivoBase: inp.motivo_base || '', plataformas, tono: inp.tono || '', resumen: (inp.resumen && typeof inp.resumen === 'object') ? inp.resumen : {}, avisos };
+  }
+  function construirPeticion(docs) {
+    return {
+      model: IA_MODELO, max_tokens: 2000,
+      tools: [IA_HERRAMIENTA], tool_choice: { type: 'tool', name: 'extraer_marca' },
+      messages: [{ role: 'user', content: [
+        ...docs.map((d) => ({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: d } })),
+        { type: 'text', text: IA_PROMPT },
+      ] }],
+    };
+  }
+  function leerRespuesta(r) {
+    const bloque = (r && r.content || []).find((b) => b.type === 'tool_use');
+    if (!bloque) throw new Error('La IA no devolvió datos de marca. Intenta con otro documento.');
+    return normalizarMarca(bloque.input || {});
+  }
+  // IA:fin
+  const aBase64 = (f) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1]); r.onerror = () => no(new Error('No pude leer «' + f.name + '».')); r.readAsDataURL(f); });
+  $('ia-leer').onclick = async () => {
+    const out = $('ia-res'), btn = $('ia-leer');
+    try {
+      const archivos = [...$('ia-archivos').files], clave = $('ia-clave').value.trim();
+      if (!archivos.length) throw new Error('Elige al menos un PDF.');
+      if (!clave) throw new Error('Pega tu clave de la API de Claude.');
+      if (archivos.reduce((t, f) => t + f.size, 0) > 24 * 1024 * 1024) throw new Error('Los PDF pesan más de 24 MB en total. Usa archivos más livianos.');
+      btn.disabled = true; out.textContent = 'Leyendo ' + archivos.length + ' documento(s)…';
+      const docs = await Promise.all(archivos.map(aBase64));
+      const resp = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: {
+        'content-type': 'application/json', 'x-api-key': clave, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true',
+      }, body: JSON.stringify(construirPeticion(docs)) });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(resp.status === 401 ? 'La clave no es válida.' : (json.error && json.error.message) || ('Error ' + resp.status + ' de la API.'));
+      const m = leerRespuesta(json);
+      if (m.cliente) $('cliente').value = m.cliente;
+      if (m.colores.length) { $('colores').innerHTML = ''; m.colores.forEach((c) => agregar(c.nombre, c.hex)); }
+      if (m.tipografia) $('tipografia').value = m.tipografia;
+      ponerBrief(Object.fromEntries(Object.entries(m.resumen).map(([k, v]) => [k, String(v || '')])));
+      $('base').value = m.base; $('base').onchange();
+      if (m.plataformas.length) ['web', 'ios', 'android'].forEach((p) => { $('p-' + p).checked = m.plataformas.includes(p); });
+      enviar($('ia-recordar').checked ? { tipo: 'guardarClave', clave } : { tipo: 'borrarClave' });
+      out.innerHTML = '<span class="ok">Formulario rellenado. Revísalo antes de aplicar.</span>' +
+        (m.tono ? '\nTono: ' + m.tono : '') + (m.motivoBase ? '\nBase sugerida (' + m.base + '): ' + m.motivoBase : '') +
+        (m.avisos.length ? '\n\nAvisos:\n• ' + m.avisos.join('\n• ') : '');
+    } catch (e) { out.innerHTML = '<span class="mal">' + (e.message || e) + '</span>'; }
+    btn.disabled = false;
+  };
+
+  let ARCHIVOS = [];
+  let IMAGENES = [];
+  const descargar = (a) => {
+    const url = URL.createObjectURL(new Blob([a.contenido], { type: 'text/plain;charset=utf-8' }));
+    const l = document.createElement('a'); l.href = url; l.download = a.nombre; document.body.appendChild(l); l.click(); l.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+  // ZIP sin compresión (una sola descarga en vez de un cuadro de «Guardar» por archivo).
+  const crcTabla = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = (b) => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = crcTabla[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const crearZip = (archivos, carpeta) => {
+    const enc = new TextEncoder(), partes = [], central = []; let pos = 0;
+    const u16 = (v) => [v & 255, (v >>> 8) & 255], u32 = (v) => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    archivos.forEach((a) => {
+      const nombre = enc.encode((carpeta ? carpeta + '/' : '') + a.nombre), datos = a.bytes || enc.encode(a.contenido), crc = crc32(datos);
+      const cab = new Uint8Array([0x50, 0x4B, 3, 4, ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(datos.length), ...u32(datos.length), ...u16(nombre.length), ...u16(0)]);
+      partes.push(cab, nombre, datos);
+      central.push(new Uint8Array([0x50, 0x4B, 1, 2, ...u16(20), ...u16(20), ...u16(0x0800), ...u16(0), ...u16(0), ...u16(0x21), ...u32(crc), ...u32(datos.length), ...u32(datos.length), ...u16(nombre.length), ...u16(0), ...u16(0), ...u16(0), ...u16(0), ...u32(0), ...u32(pos)]), nombre);
+      pos += cab.length + nombre.length + datos.length;
+    });
+    const tam = central.reduce((t, x) => t + x.length, 0);
+    const fin = new Uint8Array([0x50, 0x4B, 5, 6, ...u16(0), ...u16(0), ...u16(archivos.length), ...u16(archivos.length), ...u32(tam), ...u32(pos), ...u16(0)]);
+    return new Blob([...partes, ...central, fin], { type: 'application/zip' });
+  };
+  const descargarZip = (archivos, nombre) => {
+    const url = URL.createObjectURL(crearZip(archivos, 'entrada'));
+    const l = document.createElement('a'); l.href = url; l.download = nombre; document.body.appendChild(l); l.click(); l.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  };
+  const copiar = (a) => {
+    const t = document.createElement('textarea'); t.value = a.contenido; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok;
+  };
+  $('exp-img').onclick = () => { $('exp-lista').textContent = 'Exportando imágenes de los componentes (puede tardar unos segundos)…'; enviar({ tipo: 'exportarComponentes' }); };
+  $('exp-gen').onclick = () => { $('exp-lista').textContent = 'Generando…'; enviar({ tipo: 'exportar' }); };
+  const pintarArchivos = () => {
+    const cont = $('exp-lista'); cont.innerHTML = '';
+    if (IMAGENES.length) {
+      const imgs = IMAGENES.filter((x) => x.bytes), mb = (imgs.reduce((t, x) => t + x.bytes.length, 0) / 1048576).toFixed(1);
+      const r = document.createElement('div'); r.className = 'nota'; r.style.margin = '4px 0 8px';
+      r.innerHTML = '<b>componentes/</b>: ' + imgs.length + ' imágenes PNG (' + mb + ' MB) + componentes.json';
+      cont.appendChild(r);
+    }
+    ARCHIVOS.forEach((a, i) => {
+      const f = document.createElement('div'); f.className = 'color';
+      f.innerHTML = '<span style="flex:1;min-width:0"><b>' + a.nombre + '</b> <span class="nota">' + (a.contenido.length < 1024 ? '<1' : Math.round(a.contenido.length / 1024)) + ' KB</span></span><button type="button">Descargar</button><button type="button">Copiar</button>';
+      const [d, c] = f.querySelectorAll('button');
+      d.onclick = () => descargar(a);
+      c.onclick = () => { c.textContent = copiar(a) ? '¡Copiado!' : 'No se pudo'; setTimeout(() => { c.textContent = 'Copiar'; }, 1500); };
+      cont.appendChild(f);
+    });
+    const t = document.createElement('div'); t.className = 'fila';
+    t.innerHTML = '<button type="button" class="p">Descargar todo (.zip)</button>';
+    t.firstChild.onclick = () => descargarZip(ARCHIVOS.concat(IMAGENES), 'dsgbr-entrada.zip');
+    cont.appendChild(t);
+  };
+
+  // ---- Secuencia de carga ----
+  (() => {
+    const sp = $('splash'), barras = $('barras'), marca = $('marca'), giro = $('giro');
+    const n = 7, h0 = Math.random() * 360;
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('i');
+      const h = (h0 + i * (18 + Math.random() * 14) + Math.random() * 20) % 360;
+      b.style.background = 'hsl(' + h.toFixed(0) + ',' + (55 + Math.random() * 20).toFixed(0) + '%,' + (i % 2 ? 62 : 48) + '%)';
+      b.style.transitionDelay = (i * 0.09 + Math.random() * 0.12).toFixed(2) + 's';
+      barras.appendChild(b);
+    }
+    const t = [];
+    const paso = (ms, f) => t.push(setTimeout(f, ms));
+    let cerrado = false;
+    const cerrar = () => { if (cerrado) return; cerrado = true; t.forEach(clearTimeout); sp.classList.add('fuera'); setTimeout(() => sp.remove(), 600); };
+    sp.onclick = cerrar;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { paso(600, cerrar); return; }
+    paso(500, () => barras.classList.add('entrar'));        // aparecen las barras
+    paso(2100, () => barras.classList.add('difuminar'));    // se desenfocan y se desvanecen
+    paso(3200, () => marca.classList.add('ver'));           // aparece el ícono
+    paso(4800, () => giro.classList.add('ver'));            // unos segundos después, el spinner
+    paso(6800, cerrar);                                     // aparece el panel
+  })();
+  enviar({ tipo: 'verificar' }); enviar({ tipo: 'cargar' }); enviar({ tipo: 'fuentes' }); enviar({ tipo: 'pedirClave' });
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+const subNav = [
+  { label: 'Colores',       href: '/tokens/colors',        id: 'colors' },
+  { label: 'Tipografía',    href: '/tokens/typography',    id: 'typography' },
+  { label: 'Espaciado',     href: '/tokens/spacing',       id: 'spacing' },
+  { label: 'Border Radius', href: '/tokens/border-radius', id: 'border-radius' },
+  { label: 'Elevaciones',   href: '/tokens/elevations',    id: 'elevations' },
+  { label: 'Variables',     href: '/tokens/variables',     id: 'variables' },
+  { label: 'Descargas',     href: '/tokens/descargas',     id: 'descargas' },
+];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const grupos = [
+  ['Web', [['tokens.json', 'Tokens W3C (fuente única)'], ['tokens.css', 'Variables CSS (claro, oscuro, movimiento reducido)'], ['tailwind.css', 'Tema de Tailwind v4']]],
+  ['iOS', [['DSTokens.swift', 'Colores, medidas y pesos para SwiftUI']]],
+  ['Android', [['DsTokens.kt', 'Colores, dp/sp y pesos para Jetpack Compose']]],
+] as const;
+---
+<Layout title="Descargas" section="tokens" subNav={subNav} pageTitle="Descargas para TI" pageDesc="Archivos generados desde Figma. No se editan a mano: se regeneran con el plugin.">
+  {grupos.map(([g, fs]) => (
+    <div>
+      <p class="section-label">{g}</p>
+      <div class="dl-list">
+        {fs.map(([f, d]) => (
+          <div class="token-card dl-card">
+            <div class="token-body dl-body">
+              <div><div class="token-name">{f}</div><div class="var-col">{d}</div></div>
+              <a class="copy-btn dl-btn" href={`${base}/descargas/${f}`} download>Descargar</a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ))}
+</Layout>
+<style is:global>
+  .dl-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+  .dl-body { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .dl-btn { text-decoration: none; }
+  .var-col { font-size: 12px; color: var(--txt-tertiary); }
+</style>
