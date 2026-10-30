@@ -542,6 +542,13 @@ figma.ui.onmessage = async (msg: { tipo: string; datos?: Entrada }) => {
       figma.ui.postMessage({ tipo: 'clave', clave: (await figma.clientStorage.getAsync('dsgbr.apikey')) || '' });
     } else if (msg.tipo === 'guardarClave') {
       await figma.clientStorage.setAsync('dsgbr.apikey', (msg as any).clave);
+    } else if (msg.tipo === 'pedirGh') {
+      figma.ui.postMessage({ tipo: 'gh', cfg: (await figma.clientStorage.getAsync('dsgbr.gh')) || null, token: (await figma.clientStorage.getAsync('dsgbr.ghtoken')) || '' });
+    } else if (msg.tipo === 'guardarGh') {
+      const m = msg as any;
+      await figma.clientStorage.setAsync('dsgbr.gh', m.cfg || {});
+      if (m.borrarToken) await figma.clientStorage.deleteAsync('dsgbr.ghtoken');
+      else if (m.token) await figma.clientStorage.setAsync('dsgbr.ghtoken', m.token);
     } else if (msg.tipo === 'borrarClave') {
       await figma.clientStorage.deleteAsync('dsgbr.apikey');
     } else if (msg.tipo === 'fuentes') {

@@ -4,10 +4,15 @@
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
-  "editorType": ["figma"],
+  "editorType": [
+    "figma"
+  ],
   "documentAccess": "dynamic-page",
   "networkAccess": {
-    "allowedDomains": ["https://api.anthropic.com"],
-    "reasoning": "Lee el brief y el manual de marca con la API de Claude (opcional, con la clave del usuario). Más adelante se añadirá api.github.com."
+    "allowedDomains": [
+      "https://api.anthropic.com",
+      "https://api.github.com"
+    ],
+    "reasoning": "api.anthropic.com: lee el brief y el manual de marca con la clave del usuario (opcional). api.github.com: crea el repositorio del DocSite del cliente y sube los archivos con el token del usuario."
   }
 }

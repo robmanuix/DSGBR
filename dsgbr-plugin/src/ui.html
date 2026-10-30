@@ -19,7 +19,7 @@
   details.ia summary { cursor: pointer; font-weight: 600; }
   details.ia input[type=password], details.ia input[type=file] { width: 100%; box-sizing: border-box; font: inherit; margin-top: 4px; }
   details.ia input[type=password] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-  #ia-res, #aa-res { margin-top: 8px; padding: 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ee; white-space: pre-wrap; font-size: 11px; }
+  #ia-res, #aa-res, #gh-res { margin-top: 8px; padding: 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ee; white-space: pre-wrap; font-size: 11px; }
   #ia-res:empty { display: none; }
   .ok { color: #14803c; } .mal { color: #b42318; }
 
@@ -145,6 +145,23 @@
     <div class="fila"><button id="aa-ver" type="button">Auditar</button><button id="aa-fix" class="p" type="button">Corregir</button></div>
     <div id="aa-res" style="margin-top:8px"></div>
   </details>
+  <details class="ia" id="gh" style="margin-top:12px">
+    <summary>Publicar DocSite en GitHub</summary>
+    <div class="nota" style="margin-top:6px">Genera los archivos, crea el repositorio del cliente desde tu plantilla y los sube en un solo commit con la etiqueta de la versión. El token se guarda solo en este equipo.</div>
+    <label for="gh-owner">Usuario u organización de destino</label>
+    <input id="gh-owner" type="text" placeholder="robmanuix">
+    <label for="gh-plantilla">Repositorio plantilla (usuario/repositorio)</label>
+    <input id="gh-plantilla" type="text" placeholder="robmanuix/dsgbr-docsite-template">
+    <label for="gh-repo">Nombre del repositorio del cliente</label>
+    <input id="gh-repo" type="text" placeholder="ds-proyecto-flash">
+    <label class="opciones" style="font-weight:400"><input type="checkbox" id="gh-privado" checked> Repositorio privado</label>
+    <div class="nota">GitHub Pages en repositorios privados exige un plan de pago de GitHub. En uno gratuito, usa un repositorio público o conecta Vercel o Netlify.</div>
+    <label for="gh-token">Token de acceso de GitHub</label>
+    <input id="gh-token" type="password" placeholder="ghp_… o github_pat_…" autocomplete="off">
+    <label class="opciones" style="font-weight:400"><input type="checkbox" id="gh-recordar" checked> Recordar el token en este equipo</label>
+    <div class="fila"><button id="gh-publicar" class="p" type="button">Publicar</button></div>
+    <div id="gh-res"></div>
+  </details>
   <details class="ia" id="exp" style="margin-top:12px">
     <summary>Exportar tokens (web, iOS y Android)</summary>
     <div class="nota" style="margin-top:6px">Genera los archivos a partir de las variables de este archivo de Figma: JSON W3C, CSS, Tailwind v4, Swift y Kotlin. Los nombres salen de la sintaxis de código de cada variable.</div>
@@ -201,8 +218,9 @@
         ? '<span class="ok">Es un maestro DSGBR</span> (' + m.colecciones + ' colecciones, ' + m.paginas + ' páginas)'
         : '<span class="mal">No es un maestro DSGBR.</span> Faltan: ' + m.faltan.join(', ');
     }
-    if (m.tipo === 'exportado') { ARCHIVOS = m.archivos; pintarArchivos(); }
-    if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); }
+    if (m.tipo === 'exportado') { ARCHIVOS = m.archivos; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaA = false; ghIntentar(); } }
+    if (m.tipo === 'gh') { if (m.cfg) { $('gh-owner').value = m.cfg.owner || ''; $('gh-plantilla').value = m.cfg.plantilla || ''; if (typeof m.cfg.privado === 'boolean') $('gh-privado').checked = m.cfg.privado; } if (m.token) $('gh-token').value = m.token; if (!$('gh-owner').value) $('gh-owner').value = 'robmanuix'; if (!$('gh-plantilla').value) $('gh-plantilla').value = 'robmanuix/dsgbr-docsite-template'; }
+    if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaI = false; ghIntentar(); } }
     if (m.tipo === 'clave' && m.clave) { $('ia-clave').value = m.clave; }
     if (m.tipo === 'fuentes') {
       $('familias').innerHTML = m.familias.map((f) => '<option value="' + f.replace(/"/g, '&quot;') + '">').join('');
@@ -237,6 +255,7 @@
       $('aa-res').innerHTML = (m.cambios.length ? '<span class="ok">' + m.cambios.length + ' ajustes:</span>\n• ' + m.cambios.join('\n• ') : 'No había nada que ajustar solo.') +
         (m.restantes.length ? '\n\n<span class="mal">Siguen sin cumplir ' + m.restantes.length + ' (revísalos a mano):</span>\n' + listaAA(m.restantes) : '\n\n<span class="ok">Todos los pares cumplen AA.</span>');
     }
+    if (m.tipo === 'error' && GH_PEND) { GH_PEND = null; $('gh-publicar').disabled = false; $('gh-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; return; }
     if (m.tipo === 'error') { $('exp-lista').textContent = ''; $('salida').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; }
   };
 
@@ -339,6 +358,79 @@
     btn.disabled = false;
   };
 
+  // GH:inicio
+  const GH_API = 'https://api.github.com';
+  const ghSlug = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cliente';
+  const ghMensaje = (status, j) => {
+    const det = j && j.message ? ' (' + j.message + ')' : '';
+    if (status === 401) return 'El token no es válido o venció.';
+    if (status === 403) return 'El token no tiene permisos suficientes: necesita crear repositorios y escribir contenido.' + det;
+    if (status === 404) return 'GitHub no encontró el recurso. Revisa el usuario, la plantilla y que el token tenga acceso.' + det;
+    if (status === 422) return 'GitHub rechazó la petición' + det + '.';
+    return 'Error ' + status + ' de GitHub' + det + '.';
+  };
+  async function ghLlamar(token, metodo, ruta, cuerpo) {
+    const r = await fetch(GH_API + ruta, {
+      method: metodo,
+      headers: Object.assign({ Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, cuerpo ? { 'Content-Type': 'application/json' } : {}),
+      body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+    });
+    const texto = await r.text(); let j = null; try { j = texto ? JSON.parse(texto) : null; } catch (e) { j = null; }
+    if (!r.ok) { const e = new Error(ghMensaje(r.status, j)); e.status = r.status; throw e; }
+    return j;
+  }
+  const ghBytes = (a) => a.bytes || new TextEncoder().encode(a.contenido);
+  const ghB64 = (a) => { const b = ghBytes(a); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+  async function ghEnParalelo(items, n, fn) {
+    const out = new Array(items.length); let i = 0;
+    await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) { const k = i++; out[k] = await fn(items[k], k); } }));
+    return out;
+  }
+  /** Crea (si hace falta) el repositorio del cliente desde la plantilla y sube todos los archivos en UN solo commit; luego etiqueta la versión. */
+  async function publicarGitHub(o) {
+    const prog = o.progreso || (() => {});
+    const esperar = (ms) => new Promise((ok) => setTimeout(ok, ms));
+    const yo = await ghLlamar(o.token, 'GET', '/user');
+    const owner = (o.owner || yo.login).trim(), repo = o.repo.trim();
+    const [pOwner, pRepo] = String(o.plantilla || '').split('/');
+    let creado = false, info = null;
+    try { info = await ghLlamar(o.token, 'GET', '/repos/' + owner + '/' + repo); }
+    catch (e) { if (e.status !== 404) throw e; }
+    if (!info) {
+      if (!pOwner || !pRepo) throw new Error('Escribe la plantilla como usuario/repositorio.');
+      prog('Creando el repositorio ' + owner + '/' + repo + ' desde la plantilla…');
+      await ghLlamar(o.token, 'POST', '/repos/' + pOwner + '/' + pRepo + '/generate', { owner, name: repo, private: !!o.privado, description: o.descripcion || 'DocSite del design system', include_all_branches: false });
+      creado = true;
+      for (let i = 0; i < 20 && !info; i++) {
+        try { info = await ghLlamar(o.token, 'GET', '/repos/' + owner + '/' + repo); await ghLlamar(o.token, 'GET', '/repos/' + owner + '/' + repo + '/git/ref/heads/' + info.default_branch); }
+        catch (e) { info = null; if (e.status !== 404 && e.status !== 409) throw e; await esperar(o.espera === undefined ? 2000 : o.espera); }
+      }
+      if (!info) throw new Error('GitHub tardó demasiado en crear el repositorio. Vuelve a pulsar Publicar en un minuto.');
+    }
+    const rama = info.default_branch || 'main';
+    const base = '/repos/' + owner + '/' + repo;
+    const ref = await ghLlamar(o.token, 'GET', base + '/git/ref/heads/' + rama);
+    const cabeza = ref.object.sha;
+    const commitBase = await ghLlamar(o.token, 'GET', base + '/git/commits/' + cabeza);
+    let hechos = 0;
+    const blobs = await ghEnParalelo(o.archivos, 4, async (a) => {
+      const b = await ghLlamar(o.token, 'POST', base + '/git/blobs', { content: ghB64(a), encoding: 'base64' });
+      prog('Subiendo archivos… ' + (++hechos) + '/' + o.archivos.length);
+      return { path: a.ruta, mode: '100644', type: 'blob', sha: b.sha };
+    });
+    const arbol = await ghLlamar(o.token, 'POST', base + '/git/trees', { base_tree: commitBase.tree.sha, tree: blobs });
+    const commit = await ghLlamar(o.token, 'POST', base + '/git/commits', { message: o.mensaje || ('DocSite v' + o.version), tree: arbol.sha, parents: [cabeza] });
+    await ghLlamar(o.token, 'PATCH', base + '/git/refs/heads/' + rama, { sha: commit.sha });
+    let etiqueta = 'v' + o.version;
+    try { await ghLlamar(o.token, 'POST', base + '/git/refs', { ref: 'refs/tags/' + etiqueta, sha: commit.sha }); }
+    catch (e) { if (e.status === 422) etiqueta = etiqueta + ' (ya existía; súbela de versión para una etiqueta nueva)'; else throw e; }
+    let pages = 'activadas';
+    try { await ghLlamar(o.token, 'POST', base + '/pages', { build_type: 'workflow' }); }
+    catch (e) { pages = e.status === 409 ? 'activadas' : 'no se pudieron activar (' + e.message + ')'; }
+    return { owner, repo, creado, rama, commit: commit.sha, etiqueta, pages, archivos: o.archivos.length, url: info.html_url || ('https://github.com/' + owner + '/' + repo), sitio: 'https://' + owner + '.github.io/' + repo + '/' };
+  }
+  // GH:fin
+
   let ARCHIVOS = [];
   let IMAGENES = [];
   const descargar = (a) => {
@@ -394,6 +486,36 @@
     t.innerHTML = '<button type="button" class="p">Descargar todo (.zip)</button>';
     t.firstChild.onclick = () => descargarZip(ARCHIVOS.concat(IMAGENES), 'dsgbr-entrada.zip');
     cont.appendChild(t);
+  };
+
+  // ---- Publicar en GitHub ----
+  let GH_PEND = null;
+  enviar({ tipo: 'pedirGh' });
+  const ghNombreSugerido = () => 'ds-' + ghSlug($('cliente').value);
+  $('cliente').addEventListener('input', () => { if (!$('gh-repo').dataset.manual) $('gh-repo').value = ghNombreSugerido(); });
+  $('gh-repo').addEventListener('input', () => { $('gh-repo').dataset.manual = '1'; });
+  const ghIntentar = async () => {
+    if (!GH_PEND || GH_PEND.faltaA || GH_PEND.faltaI) return;
+    const p = GH_PEND; GH_PEND = null; const out = $('gh-res'), btn = $('gh-publicar');
+    try {
+      const cfg = (() => { try { return JSON.parse(ARCHIVOS.find((a) => a.nombre === 'docsite.config.json').contenido); } catch (e) { return {}; } })();
+      const version = cfg.version || '1.0.0';
+      const archivos = ARCHIVOS.concat(IMAGENES).map((a) => ({ ruta: 'entrada/' + a.nombre, contenido: a.contenido, bytes: a.bytes }));
+      const r = await publicarGitHub(Object.assign({}, p.datos, { archivos, version, mensaje: 'DocSite v' + version + ': ' + (cfg.cliente || p.datos.repo), descripcion: 'Design system de ' + (cfg.cliente || p.datos.repo), progreso: (t) => { out.textContent = t; } }));
+      out.innerHTML = '<span class="ok">Publicado.</span>\n' + (r.creado ? 'Repositorio creado: ' : 'Repositorio actualizado: ') + r.url + '\n' + r.archivos + ' archivos en un commit · etiqueta ' + r.etiqueta + '\nGitHub Pages: ' + r.pages + '\nSitio (tarda un par de minutos en compilar): ' + r.sitio;
+    } catch (e) { out.innerHTML = '<span class="mal">' + (e.message || e) + '</span>'; }
+    btn.disabled = false;
+  };
+  $('gh-publicar').onclick = () => {
+    const out = $('gh-res');
+    const datos = { token: $('gh-token').value.trim(), owner: $('gh-owner').value.trim(), plantilla: $('gh-plantilla').value.trim(), repo: ($('gh-repo').value.trim() || ghNombreSugerido()), privado: $('gh-privado').checked };
+    if (!datos.token) { out.innerHTML = '<span class="mal">Pega tu token de GitHub.</span>'; return; }
+    if (!/^[A-Za-z0-9._-]+$/.test(datos.repo)) { out.innerHTML = '<span class="mal">El nombre del repositorio solo admite letras, números, punto, guion y guion bajo.</span>'; return; }
+    if (datos.plantilla && !/^[^/\s]+\/[^/\s]+$/.test(datos.plantilla)) { out.innerHTML = '<span class="mal">La plantilla debe escribirse como usuario/repositorio.</span>'; return; }
+    enviar($('gh-recordar').checked ? { tipo: 'guardarGh', token: datos.token, cfg: { owner: datos.owner, plantilla: datos.plantilla, privado: datos.privado } } : { tipo: 'guardarGh', cfg: { owner: datos.owner, plantilla: datos.plantilla, privado: datos.privado }, borrarToken: true });
+    $('gh-publicar').disabled = true; out.textContent = 'Generando archivos e imágenes de componentes…';
+    GH_PEND = { datos, faltaA: true, faltaI: true };
+    enviar({ tipo: 'exportar' }); enviar({ tipo: 'exportarComponentes' });
   };
 
   // ---- Secuencia de carga ----
