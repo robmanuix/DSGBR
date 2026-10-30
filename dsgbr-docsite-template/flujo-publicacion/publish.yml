@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   build:
+    # El repositorio plantilla no publica sitio: solo los repositorios creados a partir de él.
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +36,7 @@ jobs:
 
   deploy:
     needs: build
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
