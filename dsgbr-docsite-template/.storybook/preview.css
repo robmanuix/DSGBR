@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "../build/web/tokens.css";
+@import "../build/web/tailwind.css";
+@source "../kit";
+
+html { color-scheme: light; }
+body { background: var(--color-background-primary, #fff); }

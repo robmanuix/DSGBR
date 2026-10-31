@@ -1,0 +1,33 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',       id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',   id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',    id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',     href: '/components/figma',         id: 'figma' },
+  { label: 'Kit React',       href: '/components/kit',           id: 'kit' },
+  { label: 'Constructor',     href: '/components/constructor',   id: 'constructor' },
+];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const url = `${base}/storybook/index.html`;
+---
+<Layout title="Constructor" section="components" subNav={subNav} pageTitle="Constructor de componentes" pageDesc="Prueba los componentes del kit con los tokens de esta marca: cambia propiedades y mira el resultado al instante.">
+  <p class="ctor-nota">
+    Elige un componente a la izquierda y ajusta sus propiedades abajo. <a href={url} target="_blank" rel="noopener">Abrir en una pestaña nueva</a>.
+  </p>
+  <div class="ctor-marco">
+    <iframe src={url} title="Constructor de componentes (Storybook)" loading="lazy"></iframe>
+  </div>
+  <p class="ctor-pie">En desarrollo local el constructor no se incluye en este sitio: ejecuta <code>npm run storybook</code> y ábrelo en el puerto 6006.</p>
+</Layout>
+
+<style is:global>
+  .ctor-nota { margin: 0 0 14px; font-size: 14px; color: var(--txt-secondary); }
+  .ctor-nota a { color: var(--txt-primary); text-underline-offset: 3px; }
+  .ctor-marco { border: 1px solid var(--border); border-radius: var(--r-card); overflow: hidden; background: var(--surface-card); box-shadow: var(--shadow-low); }
+  .ctor-marco iframe { display: block; width: 100%; height: min(78vh, 760px); min-height: 480px; border: 0; }
+  .ctor-pie { margin: 12px 0 0; font-size: 13px; color: var(--txt-tertiary); }
+  .ctor-pie code { background: color-mix(in srgb, var(--neutral-900) 6%, transparent); padding: 1px 6px; border-radius: 4px; }
+</style>

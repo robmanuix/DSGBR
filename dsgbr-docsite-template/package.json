@@ -6,10 +6,22 @@
   "scripts": {
     "preparar": "node scripts/preparar.mjs",
     "dev": "npm run preparar && astro dev",
-    "build": "npm run preparar && astro build",
-    "preview": "astro preview"
+    "build": "npm run preparar && astro build && node scripts/storybook.mjs",
+    "preview": "astro preview",
+    "storybook": "npm run preparar && storybook dev -p 6006"
   },
   "dependencies": {
     "astro": "^5.0.0"
+  },
+  "devDependencies": {
+    "@storybook/react-vite": "^10.6.5",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "storybook": "^10.6.5",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7"
   }
 }

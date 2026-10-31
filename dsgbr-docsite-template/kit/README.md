@@ -31,6 +31,10 @@ import { Button, Input, Alert } from './components/ds';
 
 `@source` le dice a Tailwind que busque clases dentro de los componentes; sin esa línea, los estilos no se generan.
 
+## Probarlo antes de copiarlo
+
+El DocSite incluye un **Constructor** (pestaña Components → Constructor) donde puedes cambiar las propiedades de cada componente con los tokens de la marca. En local: `npm run storybook`. Las historias están en `kit/stories`.
+
 ## Propiedades
 
 Los nombres de las propiedades siguen los del archivo de Figma, en español.
