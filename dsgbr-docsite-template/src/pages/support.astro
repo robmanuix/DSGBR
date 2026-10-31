@@ -1,5 +1,9 @@
 ---
+import { existsSync, readFileSync } from 'node:fs';
 import Layout from '../layouts/Layout.astro';
+const indice = existsSync('tokens/componentes.json') ? JSON.parse(readFileSync('tokens/componentes.json', 'utf8')) : null;
+const comps: any[] = indice?.componentes ?? [];
+const nVariantes = comps.reduce((t, c) => t + (c.variantes ?? 0), 0);
 ---
 <Layout title="Support us" section="support" pageTitle="Support us" pageDesc="Recursos, contribuciones y contacto del equipo de diseño.">
 
@@ -51,7 +55,7 @@ import Layout from '../layouts/Layout.astro';
         <tr><td style="font-weight:600">Modos de color</td><td>☀️ Claro · 🌑 Oscuro</td></tr>
         <tr><td style="font-weight:600">Fuentes</td><td>Playfair Display · Inter (Google Fonts)</td></tr>
         <tr><td style="font-weight:600">Última auditoría</td><td>2026-05-16 · 3 issues corregidos</td></tr>
-        <tr><td style="font-weight:600">Componentes</td><td>8 dinámicos · 261 variantes · 1905 iconos</td></tr>
+        <tr><td style="font-weight:600">Componentes</td><td>{comps.length ? `${comps.length} componentes · ${nVariantes} variantes` : 'Sin exportar todavía'}</td></tr>
       </tbody>
     </table>
   </div>
