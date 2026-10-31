@@ -560,17 +560,17 @@ async function exportarComponentes() {
     }
   }
   const manifiesto = JSON.stringify({ generado: new Date().toISOString().slice(0, 10), archivoFigma: figma.root.name, componentes: lista }, null, 2) + '\n';
-  return { manifiesto, imagenes };
+  let iconos = '', nIconos = 0;
+  try { const r = await exportarIconos(); iconos = r.json; nIconos = r.cantidad; } catch (_) { /* sin íconos exportables: el DocSite usa su lista mínima */ }
+  return { manifiesto, imagenes, iconos, nIconos };
 }
 
 
 // ---------- Íconos sin uso (aligerar el archivo de cada cliente) ----------
 const PAGINA_ICONOS = '↳ Íconos';
 
-/** Calcula qué conjuntos `Ícono/…` de la página Íconos no usa ningún componente ni página. `quitar` los elimina. Mantiene todo lo dudoso. */
-async function podarIconos(quitar: boolean) {
-  const pagIconos = figma.root.children.find((p) => p.name === PAGINA_ICONOS);
-  if (!pagIconos) throw new Error('No encuentro la página «' + PAGINA_ICONOS + '».');
+/** Ids de los conjuntos `Ícono/…` que usa algún componente o página (fuera de la página Íconos). */
+async function iconosEnUso(pagIconos: PageNode): Promise<Set<string>> {
   await figma.loadAllPagesAsync();
   const esIcono = (n: BaseNode | null): n is ComponentSetNode => !!n && n.type === 'COMPONENT_SET' && n.name.indexOf('Ícono/') === 0;
   const aSet = (n: BaseNode | null): ComponentSetNode | null => {
@@ -608,6 +608,14 @@ async function podarIconos(quitar: boolean) {
       }
     }
   }
+  return usados;
+}
+
+/** Calcula qué conjuntos `Ícono/…` de la página Íconos no usa ningún componente ni página. `quitar` los elimina. Mantiene todo lo dudoso. */
+async function podarIconos(quitar: boolean) {
+  const pagIconos = figma.root.children.find((p) => p.name === PAGINA_ICONOS);
+  if (!pagIconos) throw new Error('No encuentro la página «' + PAGINA_ICONOS + '».');
+  const usados = await iconosEnUso(pagIconos);
   if (usados.size === 0) throw new Error('No encontré ningún ícono en uso; no quito nada por seguridad.');
   const todos = pagIconos.findAllWithCriteria({ types: ['COMPONENT_SET'] }).filter((s) => s.name.indexOf('Ícono/') === 0);
   const sinUso = todos.filter((s) => !usados.has(s.id));
@@ -617,6 +625,28 @@ async function podarIconos(quitar: boolean) {
     figma.root.setPluginData('dsgbr.iconosQuitados', String(nombres.length));
   }
   return { total: todos.length, enUso: usados.size, sinUso: nombres.length, quitados: quitar ? nombres.length : 0, muestra: nombres.slice(0, 12) };
+}
+
+/** SVG de cada ícono en uso (estilo Lineal, 16 px) para el Constructor del DocSite. El color pasa a `currentColor`. */
+async function exportarIconos() {
+  const pagIconos = figma.root.children.find((p) => p.name === PAGINA_ICONOS);
+  if (!pagIconos) return { json: '', cantidad: 0 };
+  const usados = await iconosEnUso(pagIconos);
+  const iconos: { clave: string; nombre: string; svg: string }[] = [];
+  const claves = new Set<string>();
+  for (const set of pagIconos.findAllWithCriteria({ types: ['COMPONENT_SET'] })) {
+    if (set.name.indexOf('Ícono/') !== 0 || !usados.has(set.id)) continue;
+    const variante = (set.children.find((c) => /Estilo=Lineal/.test(c.name) && /Tamaño=16/.test(c.name)) || set.children[0]) as SceneNode | undefined;
+    if (!variante) continue;
+    let svg = await variante.exportAsync({ format: 'SVG_STRING' });
+    svg = svg.replace(/<svg[^>]*>/, (t) => t.replace(/\s(width|height)="[^"]*"/g, '')).replace(/fill="(?!none|currentColor)[^"]*"/g, 'fill="currentColor"').replace(/stroke="(?!none|currentColor)[^"]*"/g, 'stroke="currentColor"').replace(/>\s+</g, '><').trim();
+    const nombre = set.name.replace('Ícono/', '');
+    let clave = slugArchivo(nombre), k = 2;
+    while (claves.has(clave)) clave = slugArchivo(nombre) + '-' + k++;
+    claves.add(clave);
+    iconos.push({ clave, nombre, svg });
+  }
+  return { json: JSON.stringify({ generado: new Date().toISOString().slice(0, 10), iconos }, null, 2) + '\n', cantidad: iconos.length };
 }
 
 figma.ui.onmessage = async (msg: { tipo: string; datos?: Entrada }) => {

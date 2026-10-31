@@ -1,4 +1,5 @@
 ---
+import { iconosDelProyecto, iconosPorLado } from '../../lib/iconos';
 import Layout from '../../layouts/Layout.astro';
 
 const subNav = [
@@ -16,14 +17,21 @@ const sharedIcons = [
   { key: 'trash',    title: 'Eliminar',   svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4H12M5 4V2H9V4M4 4L4.5 12H9.5L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
   { key: 'upload',   title: 'Subir',      svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 9V2M4 4L7 1L10 4M2 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
 ];
-const leftIcons = [
+const leftFijos = [
   { key: 'arrow-left',  title: 'Flecha izq.', svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 7H2M2 7L6 3M2 7L6 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
   ...sharedIcons,
 ];
-const rightIcons = [
+const rightFijos = [
   { key: 'arrow-right', title: 'Flecha der.', svg: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
   ...sharedIcons,
 ];
+
+// Íconos del proyecto: salen de entrada/iconos.json (los que usan los componentes en Figma).
+// Si no se exportaron, el Constructor usa una lista mínima fija.
+const delProyecto = iconosDelProyecto(14);
+const lados = delProyecto.length ? iconosPorLado(delProyecto) : null;
+const leftIcons = lados ? lados.izq : leftFijos;
+const rightIcons = lados ? lados.der : rightFijos;
 
 const cssCode = `.btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -132,9 +140,9 @@ const cssCode = `.btn {
       <tr><td>Size</td><td>Grande · Mediano · Pequeño</td><td>Mediano</td></tr>
       <tr><td>State</td><td>Default · Hover · Active · Focus · Disabled</td><td>Default</td></tr>
       <tr><td>Label</td><td>String</td><td>Confirmar</td></tr>
-      <tr><td>Left Icon</td><td>Instance swap (6 iconos)</td><td>—</td></tr>
+      <tr><td>Left Icon</td><td>Instance swap ({leftIcons.length} iconos)</td><td>—</td></tr>
       <tr><td>View Left Icon</td><td>Boolean</td><td>false</td></tr>
-      <tr><td>Right Icon</td><td>Instance swap (6 iconos)</td><td>—</td></tr>
+      <tr><td>Right Icon</td><td>Instance swap ({leftIcons.length} iconos)</td><td>—</td></tr>
       <tr><td>View Right Icon</td><td>Boolean</td><td>false</td></tr>
     </tbody>
   </table>

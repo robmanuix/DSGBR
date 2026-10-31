@@ -19,8 +19,8 @@
   details.ia summary { cursor: pointer; font-weight: 600; }
   details.ia input[type=password], details.ia input[type=file] { width: 100%; box-sizing: border-box; font: inherit; margin-top: 4px; }
   details.ia input[type=password] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-  #ia-res, #aa-res, #gh-res { margin-top: 8px; padding: 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ee; white-space: pre-wrap; font-size: 11px; }
-  #ia-res:empty { display: none; }
+  #ia-res, #aa-res, #gh-res, #rapido-res { margin-top: 8px; padding: 8px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ee; white-space: pre-wrap; font-size: 11px; }
+  #ia-res:empty, #rapido-res:empty { display: none; }
   .ok { color: #14803c; } .mal { color: #b42318; }
 
   /* ---- Pantalla de carga (splash) ---- */
@@ -141,6 +141,9 @@
     <button id="ver">Verificar</button>
     <button id="aplicar" class="p">Crear estructura y aplicar marca</button>
   </div>
+  <div class="fila"><button id="rapido" class="p" type="button">Aplicar y publicar</button><button id="actualizar" type="button" title="Sube el parche (1.0.0 → 1.0.1), aplica y republica con etiqueta nueva">Actualizar y republicar</button></div>
+  <div class="nota">En un solo paso: aplica la marca, genera los archivos y las imágenes de componentes y publica en GitHub con los datos de «Publicar DocSite en GitHub».</div>
+  <div id="rapido-res"></div>
   <div id="estado">Sin verificar.</div>
   <details class="ia" id="aa" style="margin-top:12px">
     <summary>Contraste de los roles (AA)</summary>
@@ -225,6 +228,19 @@
       quitarSobrantes: $('quitar').checked, perfil: $('perfil').value, tipografia: $('tipografia').value.trim(), brief: leerBrief(), versionDS: $('versionDS').value.trim(),
     } });
   };
+  let RAPIDO = false, RAPIDO_PUB = false;
+  const rapidoFin = (html) => { RAPIDO = false; RAPIDO_PUB = false; $('rapido').disabled = false; $('actualizar').disabled = false; $('rapido-res').innerHTML = html; };
+  const rapidoIniciar = (subirParche) => {
+    const r = $('rapido-res');
+    if (!$('cliente').value.trim()) { r.innerHTML = '<span class="mal">Escribe el nombre del cliente.</span>'; return; }
+    if (!$('gh-token').value.trim()) { $('gh').open = true; r.innerHTML = '<span class="mal">Falta el token de GitHub. Pégalo en «Publicar DocSite en GitHub» y vuelve a pulsar.</span>'; return; }
+    if (subirParche) { const v = $('versionDS').value.trim() || '1.0.0'; if (!/^\d+\.\d+\.\d+$/.test(v)) { r.innerHTML = '<span class="mal">La versión debe tener la forma 1.0.0.</span>'; return; } subir('p'); }
+    RAPIDO = true; $('rapido').disabled = true; $('actualizar').disabled = true;
+    r.textContent = (subirParche ? 'Versión ' + $('versionDS').value + '. ' : '') + 'Paso 1 de 3: aplicando la marca al archivo…';
+    $('aplicar').onclick();
+  };
+  $('rapido').onclick = () => rapidoIniciar(false);
+  $('actualizar').onclick = () => rapidoIniciar(true);
   onmessage = (e) => {
     const m = e.data.pluginMessage; if (!m) return;
     if (m.tipo === 'estado') {
@@ -234,7 +250,7 @@
     }
     if (m.tipo === 'exportado') { ARCHIVOS = m.archivos; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaA = false; ghIntentar(); } }
     if (m.tipo === 'gh') { if (m.cfg) { $('gh-owner').value = m.cfg.owner || ''; $('gh-plantilla').value = m.cfg.plantilla || ''; if (typeof m.cfg.privado === 'boolean') $('gh-privado').checked = m.cfg.privado; } if (m.token) $('gh-token').value = m.token; if (!$('gh-owner').value) $('gh-owner').value = 'robmanuix'; if (!$('gh-plantilla').value) $('gh-plantilla').value = 'robmanuix/DSGBR-docsite-template'; }
-    if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaI = false; ghIntentar(); } }
+    if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...(m.iconos ? [{ nombre: 'iconos.json', contenido: m.iconos }] : []), ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaI = false; ghIntentar(); } }
     if (m.tipo === 'clave' && m.clave) { $('ia-clave').value = m.clave; }
     if (m.tipo === 'fuentes') {
       $('familias').innerHTML = m.familias.map((f) => '<option value="' + f.replace(/"/g, '&quot;') + '">').join('');
@@ -252,6 +268,14 @@
     }
     if (m.tipo === 'aplicado') {
       $('aplicar').textContent = 'Guardar y actualizar';
+      if (RAPIDO) {
+        RAPIDO = false; RAPIDO_PUB = true;
+        $('rapido-res').textContent = 'Paso 2 de 3: generando archivos e imágenes… (luego publica, es el paso 3)';
+        setTimeout(() => {
+          $('gh-publicar').onclick();
+          if (!GH_PEND) rapidoFin('<span class="mal">La marca se aplicó, pero no se pudo publicar: ' + $('gh-res').textContent + '</span>');
+        }, 50);
+      }
       const f = [...m.contraste.claro, ...m.contraste.oscuro].filter((c) => !c.cumple);
       $('salida').innerHTML = m.escritas + ' variables de color escritas (' + m.nuevas + ' nuevas).<br>' +
         m.creadas.length + ' páginas creadas' + (m.creadas.length ? ': ' + m.creadas.join(', ') : '') + '.<br>' +
@@ -275,7 +299,8 @@
       $('aa-res').innerHTML = (m.cambios.length ? '<span class="ok">' + m.cambios.length + ' ajustes:</span>\n• ' + m.cambios.join('\n• ') : 'No había nada que ajustar solo.') +
         (m.restantes.length ? '\n\n<span class="mal">Siguen sin cumplir ' + m.restantes.length + ' (revísalos a mano):</span>\n' + listaAA(m.restantes) : '\n\n<span class="ok">Todos los pares cumplen AA.</span>');
     }
-    if (m.tipo === 'error' && GH_PEND) { GH_PEND = null; $('gh-publicar').disabled = false; $('gh-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; return; }
+    if (m.tipo === 'error' && RAPIDO) { rapidoFin('<span class="mal">No se pudo aplicar la marca: ' + m.mensaje + '</span>'); return; }
+    if (m.tipo === 'error' && GH_PEND) { GH_PEND = null; $('gh-publicar').disabled = false; $('gh-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; if (RAPIDO_PUB) rapidoFin('<span class="mal">La marca se aplicó, pero falló la exportación: ' + m.mensaje + '</span>'); return; }
     if (m.tipo === 'error' && /^(Revisando|Quitando)/.test($('ico-res').textContent)) { $('ico-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; return; }
     if (m.tipo === 'error') { $('exp-lista').textContent = ''; $('salida').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; }
   };
@@ -502,7 +527,7 @@
     if (IMAGENES.length) {
       const imgs = IMAGENES.filter((x) => x.bytes), mb = (imgs.reduce((t, x) => t + x.bytes.length, 0) / 1048576).toFixed(1);
       const r = document.createElement('div'); r.className = 'nota'; r.style.margin = '4px 0 8px';
-      r.innerHTML = '<b>componentes/</b>: ' + imgs.length + ' imágenes PNG (' + mb + ' MB) + componentes.json';
+      r.innerHTML = '<b>componentes/</b>: ' + imgs.length + ' imágenes PNG (' + mb + ' MB) + componentes.json' + (IMAGENES.some((x) => x.nombre === 'iconos.json') ? ' + iconos.json (íconos en uso)' : '');
       cont.appendChild(r);
     }
     ARCHIVOS.forEach((a, i) => {
@@ -536,6 +561,7 @@
       out.innerHTML = '<span class="ok">Publicado.</span>\n' + (r.creado ? 'Repositorio creado: ' : 'Repositorio actualizado: ') + r.url + '\n' + r.archivos + ' archivos en un commit · etiqueta ' + r.etiqueta + '\nGitHub Pages: ' + r.pages + '\nSitio (tarda un par de minutos en compilar): ' + r.sitio;
     } catch (e) { out.innerHTML = '<span class="mal">' + (e.message || e) + '</span>'; }
     btn.disabled = false;
+    if (RAPIDO_PUB) { const bien = !!out.querySelector('.ok'); rapidoFin(bien ? '<span class="ok">Listo: marca aplicada y sitio publicado.</span> Los detalles y el enlace están en «Publicar DocSite en GitHub».' : '<span class="mal">La marca se aplicó, pero la publicación falló. Mira el detalle en «Publicar DocSite en GitHub».</span>'); }
   };
   $('gh-publicar').onclick = () => {
     const out = $('gh-res');

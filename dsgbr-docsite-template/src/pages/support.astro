@@ -1,49 +1,57 @@
 ---
 import { existsSync, readFileSync } from 'node:fs';
 import Layout from '../layouts/Layout.astro';
+import { config, todos, resolver, paresContraste } from '../lib/tokens';
+
 const indice = existsSync('tokens/componentes.json') ? JSON.parse(readFileSync('tokens/componentes.json', 'utf8')) : null;
 const comps: any[] = indice?.componentes ?? [];
 const nVariantes = comps.reduce((t, c) => t + (c.variantes ?? 0), 0);
+
+const cliente = config.cliente ?? 'tu marca';
+const familia = String(resolver(todos.find((t) => t.nombre === 'Familia/Marca') ?? ({ valor: '', modos: {}, modoBase: 'Valor' } as any)) || '');
+const pares = paresContraste();
+const cumplen = pares.filter((p) => p.cumple).length;
+const modos = todos.some((t) => t.coleccion === 'Semánticos: Color' && Object.keys(t.modos ?? {}).length > 1) ? 'Claro · Oscuro' : 'Claro';
+const generado = String(config.generado ?? '').slice(0, 10);
 ---
-<Layout title="Support us" section="support" pageTitle="Support us" pageDesc="Recursos, contribuciones y contacto del equipo de diseño.">
+<Layout title="Support us" section="support" pageTitle="Support us" pageDesc="Recursos y contacto del equipo de diseño.">
 
   <div style="max-width:640px">
     <div class="support-hero">
-      <div style="font-size:48px;margin-bottom:16px">🙌</div>
-      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:var(--txt-primary)">Gracias por usar el Sistema de Diseño</h2>
+      <h2 style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px;color:var(--txt-primary)">Gracias por usar el sistema de diseño de {cliente}</h2>
       <p style="font-size:15px;color:var(--txt-secondary);line-height:1.6">
-        Este sistema fue construido para garantizar consistencia visual, accesibilidad y velocidad de desarrollo. Si encuentras algún problema o quieres contribuir, estos son los canales disponibles.
+        Reúne los tokens, estilos y componentes de la marca para mantener la consistencia visual entre diseño y desarrollo. Si encuentras un problema o quieres proponer un cambio, estos son los canales.
       </p>
     </div>
 
     <p class="section-label">Recursos</p>
     <div class="resource-list">
       <div class="resource-item">
-        <div class="resource-icon" style="background:#f3f0ff">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="2" stroke="#7c3aed" stroke-width="1.5"/><path d="M6 7H14M6 10H11" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div class="resource-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 7H14M6 10H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
         <div>
-          <div class="resource-title">Archivo Figma</div>
-          <div class="resource-desc">Accede al archivo maestro del Design System con todos los tokens, componentes y referencias.</div>
-          <code class="resource-code">LhZrYVa1Sc4tJPDMUNN6Nu</code>
+          <div class="resource-title">Archivo de Figma</div>
+          <div class="resource-desc">Tokens, estilos y componentes de la marca. Pide acceso al equipo de diseño si no lo tienes.</div>
+          {config.archivo && <code class="resource-code">{config.archivo}</code>}
         </div>
       </div>
       <div class="resource-item">
-        <div class="resource-icon" style="background:#f0fdf4">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="#16803d" stroke-width="1.5"/><path d="M10 6V10L13 13" stroke="#16803d" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div class="resource-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 6V10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>
           <div class="resource-title">Versión actual</div>
-          <div class="resource-desc">Sistema de Diseño v1.0.0 · Auditado 2026-05-16 · Compatible con WCAG AA.</div>
+          <div class="resource-desc">v{config.version ?? '1.0.0'}{generado && ` · generada el ${generado}`}</div>
         </div>
       </div>
       <div class="resource-item">
-        <div class="resource-icon" style="background:#fff7ed">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.6L18 8.4L14 12.3L15 18L10 15.3L5 18L6 12.3L2 8.4L7.6 7.6L10 2Z" stroke="#ea580c" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        <div class="resource-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.4 7.6L18 8.4L14 12.3L15 18L10 15.3L5 18L6 12.3L2 8.4L7.6 7.6L10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
         </div>
         <div>
           <div class="resource-title">Contribuciones</div>
-          <div class="resource-desc">Para proponer cambios, nuevos componentes o correcciones, abre un issue en el repositorio del proyecto.</div>
+          <div class="resource-desc">Para proponer cambios, componentes nuevos o correcciones, abre un issue en el repositorio del proyecto.</div>
         </div>
       </div>
     </div>
@@ -51,10 +59,10 @@ const nVariantes = comps.reduce((t, c) => t + (c.variantes ?? 0), 0);
     <p class="section-label" style="margin-top:40px">Estado del sistema</p>
     <table class="ds-table">
       <tbody>
-        <tr><td style="font-weight:600;width:180px">WCAG Compliance</td><td><span class="tag tag-primary">AA ✓</span></td></tr>
-        <tr><td style="font-weight:600">Modos de color</td><td>☀️ Claro · 🌑 Oscuro</td></tr>
-        <tr><td style="font-weight:600">Fuentes</td><td>Playfair Display · Inter (Google Fonts)</td></tr>
-        <tr><td style="font-weight:600">Última auditoría</td><td>2026-05-16 · 3 issues corregidos</td></tr>
+        <tr><td style="font-weight:600;width:180px">Contraste AA</td><td>{pares.length ? <span class={`tag ${cumplen === pares.length ? 'tag-primary' : 'tag-neutral'}`}>{cumplen} de {pares.length} pares clave cumplen 4,5:1</span> : 'Sin datos'}</td></tr>
+        <tr><td style="font-weight:600">Modos de color</td><td>{modos}</td></tr>
+        <tr><td style="font-weight:600">Fuente de la marca</td><td>{familia || 'Sin datos'}</td></tr>
+        <tr><td style="font-weight:600">Versión</td><td>v{config.version ?? '1.0.0'}{config.base && ` · base ${config.base}`}</td></tr>
         <tr><td style="font-weight:600">Componentes</td><td>{comps.length ? `${comps.length} componentes · ${nVariantes} variantes` : 'Sin exportar todavía'}</td></tr>
       </tbody>
     </table>
@@ -62,11 +70,11 @@ const nVariantes = comps.reduce((t, c) => t + (c.variantes ?? 0), 0);
 </Layout>
 
 <style>
-  .support-hero { background: var(--prim-100); border-radius: var(--r-lg); padding: 32px; margin-bottom: 32px; text-align: center; }
+  .support-hero { background: color-mix(in srgb, var(--prim-500) 9%, var(--surface-card)); border: 1px solid var(--border); border-radius: var(--r-card); padding: 36px 32px; margin-bottom: 32px; text-align: left; }
   .resource-list { display: flex; flex-direction: column; gap: 12px; }
-  .resource-item { display: flex; gap: 16px; background: #fff; border: 1px solid var(--border); border-radius: var(--r-md); padding: 18px 20px; box-shadow: var(--shadow-low); align-items: flex-start; }
-  .resource-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .resource-item { display: flex; gap: 16px; background: #fff; border: 1px solid var(--border); border-radius: var(--r-card); padding: 18px 20px; box-shadow: var(--shadow-low); align-items: flex-start; }
+  .resource-icon { width: 40px; height: 40px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: color-mix(in srgb, var(--prim-500) 12%, transparent); color: var(--prim-700); }
   .resource-title { font-size: 15px; font-weight: 600; color: var(--txt-primary); margin-bottom: 4px; }
   .resource-desc { font-size: 13px; color: var(--txt-secondary); line-height: 1.5; }
-  .resource-code { display: inline-block; margin-top: 8px; font-size: 12px; background: var(--neutral-100); padding: 3px 8px; border-radius: var(--r-sm); font-family: 'Courier New', monospace; color: var(--txt-secondary); }
+  .resource-code { display: inline-block; margin-top: 8px; font-size: 12px; background: var(--neutral-100); padding: 3px 8px; border-radius: var(--r-sm); font-family: var(--font-mono); color: var(--txt-secondary); }
 </style>

@@ -34,7 +34,7 @@ function descomprimir(ruta, salida) {
 const destinos = {
   'tokens.json': 'tokens/tokens.json', 'estilos.json': 'tokens/estilos.json', 'docsite.config.json': 'docsite.config.json',
   'tokens.css': 'build/web/tokens.css', 'tailwind.css': 'build/web/tailwind.css',
-  'componentes.json': 'tokens/componentes.json', 'DSTokens.swift': 'build/ios/DSTokens.swift', 'DsTokens.kt': 'build/android/DsTokens.kt',
+  'componentes.json': 'tokens/componentes.json', 'iconos.json': 'tokens/iconos.json', 'DSTokens.swift': 'build/ios/DSTokens.swift', 'DsTokens.kt': 'build/android/DsTokens.kt',
 };
 if (existsSync('entrada')) {
   // Del más antiguo al más reciente (por fecha del archivo): el último en abrirse gana.
@@ -46,6 +46,9 @@ if (existsSync('entrada')) {
   const soloArchivos = (dir) => readdirSync(dir).filter((x) => statSync(`${dir}/${x}`).isFile());
   const sueltos = soloArchivos('entrada').filter((x) => !x.startsWith('.') && !x.toLowerCase().endsWith('.zip'));
   if (carpeta && sueltos.length) console.log('Aviso: hay archivos sueltos en entrada/ (' + sueltos.join(', ') + '). Con un .zip presente se usa el contenido del .zip; borra los sueltos para evitar confusiones.');
+  // Si la entrada actual no trae iconos.json, se descarta el de una ejecución anterior (el Constructor usa su lista mínima).
+  const nombresEntrada = [...sueltos, ...(carpeta ? soloArchivos(carpeta) : [])];
+  if (nombresEntrada.length && !nombresEntrada.includes('iconos.json')) rmSync('tokens/iconos.json', { force: true });
   // Los sueltos se copian primero y el ZIP al final: el ZIP más reciente siempre gana.
   for (const f of [...sueltos, ...(carpeta ? soloArchivos(carpeta).map((x) => `.contenido/${x}`) : [])]) {
     const d = destinos[f.split('/').pop()];
