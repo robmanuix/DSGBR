@@ -9,4 +9,5 @@ export const foco =
 export const transicion = 'transition-colors duration-(--motion-duration-fast) ease-(--motion-easing-standard) motion-reduce:transition-none';
 
 /** Tipografía de la marca. */
-export const fuente = 'font-(family-name:--font-family-brand)';
+/** Tipografía de la marca, con respaldo sans-serif por si la fuente aún no cargó. */
+export const fuente = 'font-[family-name:var(--font-family-brand),system-ui,sans-serif]';
