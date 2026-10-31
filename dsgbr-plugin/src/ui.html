@@ -126,6 +126,8 @@
     <input id="b-ejemploBoton" type="text">
     <label for="b-ejemploVacio">Ejemplo de estado vacío</label>
     <textarea id="b-ejemploVacio" rows="2"></textarea>
+    <label for="b-fotografia">Dirección fotográfica</label>
+    <textarea id="b-fotografia" rows="2" placeholder="Estilo, luz, encuadres, qué evitar"></textarea>
   </details>
 
   <label for="extras">Páginas adicionales (una por línea)</label>
@@ -206,7 +208,7 @@
   $('mas').onclick = () => agregar();
   agregar('Brand', '#3366E6');
   const leerColores = () => [...$('colores').children].map((f) => ({ nombre: f.querySelector('.n').value.trim(), hex: f.querySelector('.h').value.trim() }));
-  const BRIEF = ["sector", "propuesta", "publico", "idioma", "voz", "tono", "tratamiento", "mayusculas", "errores", "evitar", "ejemploBoton", "ejemploVacio"];
+  const BRIEF = ["sector", "propuesta", "publico", "idioma", "voz", "tono", "tratamiento", "mayusculas", "errores", "evitar", "ejemploBoton", "ejemploVacio", "fotografia"];
   const leerBrief = () => { const b = {}; BRIEF.forEach((k) => { const v = $('b-' + k).value.trim(); if (v) b[k] = v; }); return b; };
   const ponerBrief = (b) => { BRIEF.forEach((k) => { if (b && b[k]) $('b-' + k).value = b[k]; }); };
   const listaAA = (f) => f.map((p) => '• ' + p.rol + ' sobre ' + p.sobre + ' (' + (p.modo === 'claro' ? 'Claro' : 'Oscuro') + '): ' + p.ratio + ':1, mínimo ' + p.minimo + ':1').join('\n');
@@ -331,6 +333,7 @@
           tono: { type: 'string', description: 'Tono en la interfaz: cercano, formal o técnico' }, tratamiento: { type: 'string', description: 'Tú, usted u otro' },
           mayusculas: { type: 'string', description: 'Cómo se escriben los botones (tipo oración, título, mayúsculas)' }, errores: { type: 'string', description: 'Guía de redacción de errores si el manual la trae' },
           evitar: { type: 'string', description: 'Palabras o expresiones a evitar' },
+          fotografia: { type: 'string', description: 'Dirección fotográfica o de imagen si el manual la trae: estilo, luz, encuadres y qué evitar' },
         } },
         advertencias: { type: 'array', items: { type: 'string' }, description: 'Dudas, datos que faltan o contradicciones entre documentos' },
       },

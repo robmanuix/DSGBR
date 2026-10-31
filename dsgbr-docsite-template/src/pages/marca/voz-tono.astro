@@ -1,0 +1,83 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { config } from '../../lib/tokens';
+import { leerBrief, lista } from '../../lib/brief';
+import '../../styles/marca.css';
+
+const subNav = [
+  { label: 'Voz y tono', href: '/marca/voz-tono', id: 'voz-tono' },
+  { label: 'Fotografía', href: '/marca/fotografia', id: 'fotografia' },
+];
+const b = leerBrief();
+const cliente = config.cliente ?? 'la marca';
+const contexto = [
+  ['Sector', b.sector], ['Idioma principal', b.idioma], ['Público objetivo', b.publico], ['Propuesta de valor', b.propuesta],
+].filter(([, v]) => v) as [string, string][];
+const estilo = [
+  ['Tono en interfaz', b.tono], ['Tratamiento', b.tratamiento], ['Mayúsculas en botones', b.mayusculas],
+].filter(([, v]) => v) as [string, string][];
+const hayDatos = Object.keys(b).some((k) => k !== 'fotografia');
+---
+<Layout title="Voz y tono" section="marca" subNav={subNav} pageTitle="Voz y tono" pageDesc={`Cómo habla ${cliente} en su producto: voz, tono y ejemplos de redacción.`}>
+  {!hayDatos ? (
+    <div class="marca-vacio">
+      <h2>Aún no hay voz y tono para esta marca</h2>
+      <p>Esta página se llena con el brief del cliente. En el plugin de Figma completa «Brief» (o deja que la lectura con IA lo rellene) y vuelve a publicar el DocSite.</p>
+    </div>
+  ) : (
+    <>
+      {contexto.length > 0 && (
+        <>
+          <p class="section-label">Sobre la marca</p>
+          <div class="marca-grid">
+            {contexto.map(([t, v]) => <div class="marca-card"><h3>{t}</h3><p>{v}</p></div>)}
+          </div>
+        </>
+      )}
+
+      {b.voz && (
+        <>
+          <p class="section-label">Voz de marca</p>
+          <div class="chips">{lista(b.voz).map((v) => <span class="chip">{v}</span>)}</div>
+        </>
+      )}
+
+      {estilo.length > 0 && (
+        <>
+          <p class="section-label">En la interfaz</p>
+          <div class="marca-grid">
+            {estilo.map(([t, v]) => <div class="marca-card"><h3>{t}</h3><p class="dato">{v}</p></div>)}
+          </div>
+        </>
+      )}
+
+      {b.errores && (
+        <>
+          <p class="section-label">Mensajes de error</p>
+          <div class="marca-card"><p>{b.errores}</p></div>
+        </>
+      )}
+
+      {b.evitar && (
+        <>
+          <p class="section-label">Palabras a evitar</p>
+          <div class="chips">{lista(b.evitar).map((v) => <span class="chip evitar">{v}</span>)}</div>
+        </>
+      )}
+
+      {(b.ejemploBoton || b.ejemploVacio) && (
+        <>
+          <p class="section-label">Ejemplos</p>
+          <div class="marca-grid">
+            {b.ejemploBoton && (
+              <div class="marca-card ejemplo"><h3>Botón principal</h3><button class="btn-demo" type="button">{b.ejemploBoton}</button></div>
+            )}
+            {b.ejemploVacio && (
+              <div class="marca-card ejemplo"><h3>Estado vacío</h3><div class="vacio-demo">{b.ejemploVacio}</div></div>
+            )}
+          </div>
+        </>
+      )}
+    </>
+  )}
+</Layout>

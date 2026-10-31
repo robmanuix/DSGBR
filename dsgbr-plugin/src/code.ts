@@ -25,6 +25,8 @@ interface Brief {
   sector?: string; propuesta?: string; publico?: string; idioma?: string;
   voz?: string; tono?: string; tratamiento?: string; mayusculas?: string;
   errores?: string; evitar?: string; ejemploBoton?: string; ejemploVacio?: string;
+  /** Dirección fotográfica (solo se muestra en el DocSite; no tiene página en Figma). */
+  fotografia?: string;
 }
 
 /** Asigna la sintaxis de código solo si la variable aún no la tiene (no cambia nombres ya entregados). */
@@ -676,6 +678,10 @@ figma.ui.onmessage = async (msg: { tipo: string; datos?: Entrada }) => {
         marca: marca ? { cliente: marca.cliente, base: marca.base, plataformas: marca.plataformas, version: marca.versionDS || '1.0.0', archivo: figma.root.name, colores: marca.colores, tipografia: marca.tipografia } : undefined,
         estilosTexto: est.texto, estilosEfecto: est.efectos,
       });
+      // Brief de la marca para las páginas «Voz y tono» y «Fotografía» del DocSite.
+      if (marca && marca.brief && Object.keys(marca.brief).length) {
+        archivos.push({ nombre: 'brief.json', contenido: JSON.stringify({ generado: new Date().toISOString().slice(0, 10), cliente: marca.cliente || '', brief: marca.brief }, null, 2) } as any);
+      }
       figma.ui.postMessage({ tipo: 'exportado', archivos });
     } else if (msg.tipo === 'pedirClave') {
       figma.ui.postMessage({ tipo: 'clave', clave: (await figma.clientStorage.getAsync('dsgbr.apikey')) || '' });

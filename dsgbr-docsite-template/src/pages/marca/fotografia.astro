@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { config } from '../../lib/tokens';
+import { leerBrief, frases } from '../../lib/brief';
+import '../../styles/marca.css';
+
+const subNav = [
+  { label: 'Voz y tono', href: '/marca/voz-tono', id: 'voz-tono' },
+  { label: 'Fotografía', href: '/marca/fotografia', id: 'fotografia' },
+];
+const b = leerBrief();
+const cliente = config.cliente ?? 'la marca';
+const puntos = frases(b.fotografia);
+---
+<Layout title="Fotografía" section="marca" subNav={subNav} pageTitle="Fotografía" pageDesc={`Dirección de imagen de ${cliente}: estilo, luz, encuadres y qué evitar.`}>
+  {puntos.length === 0 ? (
+    <div class="marca-vacio">
+      <h2>Aún no hay dirección fotográfica</h2>
+      <p>Escribe el criterio de imagen de la marca en el campo «Dirección fotográfica» del brief, en el plugin de Figma, o súbelo con el manual en la lectura con IA. Luego vuelve a publicar el DocSite.</p>
+    </div>
+  ) : (
+    <>
+      <p class="section-label">Dirección de imagen</p>
+      <div class="marca-card"><ul class="marca-lista">{puntos.map((p) => <li>{p}</li>)}</ul></div>
+    </>
+  )}
+</Layout>

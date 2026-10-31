@@ -1,0 +1,17 @@
+.marca-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 8px; }
+.marca-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--r-card); padding: 20px 22px; box-shadow: var(--shadow-low); }
+.marca-card h3 { font-size: 13px; font-weight: 500; color: var(--txt-secondary); margin: 0 0 8px; }
+.marca-card p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--txt-primary); }
+.marca-card .dato { font-size: 20px; font-weight: 600; letter-spacing: -.01em; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-card); font-size: 13px; font-weight: 500; color: var(--txt-primary); }
+.chip.evitar { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--txt-tertiary) 60%, transparent); color: var(--txt-secondary); }
+.marca-lista { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.marca-lista li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.55; color: var(--txt-primary); }
+.marca-lista li::before { content: ''; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand-500, var(--txt-tertiary)); }
+.ejemplo { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.ejemplo .btn-demo { background: var(--color-brand-500); color: var(--color-content-primary-inverse, #fff); border: 0; border-radius: var(--r-card); padding: 12px 22px; font: inherit; font-weight: 600; font-size: 15px; }
+.ejemplo .vacio-demo { width: 100%; text-align: center; padding: 28px 20px; border: 1px dashed var(--border); border-radius: var(--r-card); color: var(--txt-secondary); font-size: 15px; line-height: 1.55; }
+.marca-vacio { max-width: 560px; padding: 28px; border: 1px dashed var(--border); border-radius: var(--r-card); background: var(--surface-card); }
+.marca-vacio h2 { font-size: 17px; font-weight: 600; margin: 0 0 8px; color: var(--txt-primary); }
+.marca-vacio p { margin: 0 0 8px; font-size: 14px; line-height: 1.6; color: var(--txt-secondary); }
