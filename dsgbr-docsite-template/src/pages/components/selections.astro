@@ -87,6 +87,13 @@ const subNav = [
     <pre id="comp-code"></pre>
   </div>
 
+  <p class="section-label">React + Tailwind</p>
+  <p style="margin-bottom:8px;font-size:13px;color:var(--txt-secondary)">Usa <code>Switch</code>, <code>Checkbox</code> o <code>Radio</code> del Kit React, según el componente elegido.</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-react-copy">Copiar</button>
+    <pre id="comp-react"></pre>
+  </div>
+
   <p class="section-label">CSS completo</p>
   <div class="code-block">
     <button class="copy-btn" data-copy={`/* Toggle */
@@ -232,6 +239,14 @@ const subNav = [
     }
 
     (document.getElementById('comp-code') as HTMLElement).textContent = code;
+
+    // React + Tailwind (componentes del kit)
+    const nombre = comp === 'toggle' ? 'Switch' : comp === 'checkbox' ? 'Checkbox' : 'Radio';
+    const ra = [`etiqueta="${label.replace(/"/g, '&quot;')}"`];
+    if (selected) ra.push('defaultChecked');
+    if (disabled) ra.push('disabled');
+    (document.getElementById('comp-react') as HTMLElement).textContent =
+      `import { ${nombre} } from './kit';\n\n<${nombre} ${ra.join(' ')} />`;
   }
 
   document.querySelectorAll('#p-comp .pill, #p-state .pill').forEach(pill => {
@@ -248,6 +263,15 @@ const subNav = [
     const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
     navigator.clipboard.writeText(code).then(() => {
       const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  document.getElementById('comp-react-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-react') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-react-copy')!;
       btn.textContent = 'Copiado ✓';
       setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
     });

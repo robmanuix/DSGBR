@@ -88,6 +88,13 @@ const cssCode = `.notif { display:flex; border-radius:8px; border:1px solid; ove
     <pre id="comp-code"></pre>
   </div>
 
+  <p class="section-label">React + Tailwind</p>
+  <p style="margin-bottom:8px;font-size:13px;color:var(--txt-secondary)">Usa el componente <code>Alert</code> del Kit React. Los estados son info, éxito, aviso y error.</p>
+  <div class="code-block" style="margin-bottom:32px">
+    <button class="copy-btn" id="comp-react-copy">Copiar</button>
+    <pre id="comp-react"></pre>
+  </div>
+
   <p class="section-label">CSS completo</p>
   <div class="code-block">
     <button class="copy-btn" data-copy={cssCode}>Copiar</button>
@@ -164,6 +171,13 @@ const cssCode = `.notif { display:flex; border-radius:8px; border:1px solid; ove
 </div>`;
 
     (document.getElementById('comp-code') as HTMLElement).textContent = code;
+
+    // React + Tailwind (componentes del kit)
+    const estadoR: Record<string,string> = { info: 'info', success: 'exito', error: 'error', warning: 'aviso' };
+    const acc = showBtn ? ` acciones={<Button tipo="terciario" tamano="s">Descartar</Button>}` : '';
+    const imp = showBtn ? 'Alert, Button' : 'Alert';
+    (document.getElementById('comp-react') as HTMLElement).textContent =
+      `import { ${imp} } from './kit';\n\n<Alert estado="${estadoR[type]}" titulo="${t.label}"${acc}>\n  ${msg}\n</Alert>`;
   }
 
   document.querySelectorAll('#p-type .pill').forEach(pill => {
@@ -181,6 +195,15 @@ const cssCode = `.notif { display:flex; border-radius:8px; border:1px solid; ove
     const code = (document.getElementById('comp-code') as HTMLElement).textContent ?? '';
     navigator.clipboard.writeText(code).then(() => {
       const btn = document.getElementById('comp-copy')!;
+      btn.textContent = 'Copiado ✓';
+      setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
+    });
+  });
+
+  document.getElementById('comp-react-copy')!.addEventListener('click', () => {
+    const code = (document.getElementById('comp-react') as HTMLElement).textContent ?? '';
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById('comp-react-copy')!;
       btn.textContent = 'Copiado ✓';
       setTimeout(() => { btn.textContent = 'Copiar'; }, 1800);
     });
