@@ -1,0 +1,101 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { leerKit } from '../../lib/kit';
+
+const subNav = [
+  { label: 'Botones',         href: '/components/buttons',       id: 'buttons' },
+  { label: 'Campos de Texto', href: '/components/text-fields',   id: 'text-fields' },
+  { label: 'Selecciones',     href: '/components/selections',    id: 'selections' },
+  { label: 'Notificaciones',  href: '/components/notifications', id: 'notifications' },
+  { label: 'Desde Figma',     href: '/components/figma',         id: 'figma' },
+  { label: 'Kit React',       href: '/components/kit',           id: 'kit' },
+];
+const kit = leerKit();
+const todos = [...new Set(kit.flatMap((c) => c.tokens.map((t) => t.nombre)))];
+const faltan = [...new Set(kit.flatMap((c) => c.tokens.filter((t) => !t.existe).map((t) => t.nombre)))];
+const grupos = ['Color', 'Radio', 'Tipografía', 'Espacio', 'Movimiento', 'Elevación', 'Borde'];
+---
+<Layout title="Kit React" section="components" subNav={subNav} pageTitle="Kit React + Tailwind" pageDesc="Componentes web listos para copiar al producto. Leen los tokens de esta marca, sin valores fijos.">
+  {kit.length === 0 ? (
+    <div class="kit-vacio"><h2>Esta versión no incluye el kit</h2><p>La carpeta <code>kit/</code> viene en la plantilla del DocSite. Actualiza el repositorio desde la plantilla para recibirla.</p></div>
+  ) : (
+    <>
+      <p class="section-label">Cómo usarlo</p>
+      <div class="kit-card">
+        <ol class="kit-pasos">
+          <li>Necesitas React 18 o 19 y Tailwind v4.</li>
+          <li>Copia <code>kit/components</code> a tu proyecto, por ejemplo a <code>src/components/ds</code>.</li>
+          <li>En tu CSS principal importa Tailwind y los tokens de esta marca, y dile a Tailwind dónde buscar las clases:</li>
+        </ol>
+        <pre class="kit-code"><code>@import "tailwindcss";
+@import "./tokens.css";   /* Descargas → tokens.css */
+@import "./tailwind.css"; /* Descargas → tailwind.css */
+@source "./components/ds";</code></pre>
+        <pre class="kit-code"><code>{`import { Button, Input, Alert } from './components/ds';
+
+<Button tipo="primario">Continuar</Button>
+<Input etiqueta="Correo" ayuda="Te avisaremos por aquí." />`}</code></pre>
+      </div>
+
+      <p class="section-label">Estado de los tokens</p>
+      <div class="kit-card kit-estado">
+        {faltan.length === 0
+          ? <p><strong>{todos.length} de {todos.length}</strong> tokens que usa el kit existen en esta marca.</p>
+          : <>
+              <p><strong>{todos.length - faltan.length} de {todos.length}</strong> tokens que usa el kit existen en esta marca. Los {faltan.length} restantes no se exportaron, y el componente que los use se verá sin ese valor:</p>
+              <div class="kit-chips">{faltan.map((t) => <code class="kit-token kit-falta">{t}</code>)}</div>
+            </>}
+      </div>
+
+      <p class="section-label">Componentes ({kit.length})</p>
+      {kit.map((c) => (
+        <article class="kit-card" id={c.clave.toLowerCase()}>
+          <div class="kit-cab"><h2>{c.nombre}</h2><code class="kit-import">{c.clave}</code></div>
+          {c.props.length > 0 && (
+            <table class="kit-tabla">
+              <thead><tr><th>Propiedad</th><th>Valores</th></tr></thead>
+              <tbody>{c.props.map((p) => <tr><td><code>{p.nombre}</code></td><td>{p.valores || '—'}</td></tr>)}</tbody>
+            </table>
+          )}
+          <details class="kit-tokens">
+            <summary>Tokens que usa ({c.tokens.length})</summary>
+            {grupos.map((g) => {
+              const ts = c.tokens.filter((t) => t.grupo === g);
+              return ts.length ? (
+                <div class="kit-grupo"><span class="kit-grupo-n">{g}</span>
+                  <div class="kit-chips">{ts.map((t) => <code class:list={['kit-token', { 'kit-falta': !t.existe }]} title={t.existe ? '' : 'No existe en esta marca'}>{t.nombre}</code>)}</div>
+                </div>
+              ) : null;
+            })}
+          </details>
+        </article>
+      ))}
+    </>
+  )}
+</Layout>
+
+<style is:global>
+  .kit-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--r-card); padding: 20px 22px; box-shadow: var(--shadow-low); margin-bottom: 14px; }
+  .kit-pasos { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; line-height: 1.55; color: var(--txt-primary); }
+  .kit-code { margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--neutral-900); color: #f4f6fb; font: 13px/1.6 var(--font-mono, ui-monospace, monospace); overflow-x: auto; }
+  .kit-code code, .kit-card code { font-family: inherit; }
+  .kit-card :not(pre) > code { background: color-mix(in srgb, var(--neutral-900) 6%, transparent); padding: 1px 6px; border-radius: 4px; font-size: .92em; }
+  .kit-estado p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--txt-primary); }
+  .kit-estado p:last-child { margin: 0; }
+  .kit-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .kit-cab h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--txt-primary); }
+  .kit-import { font-size: 12px; color: var(--txt-secondary); }
+  .kit-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .kit-tabla th, .kit-tabla td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .kit-tabla th { font-weight: 600; font-size: 12px; color: var(--txt-tertiary); }
+  .kit-tokens { margin-top: 12px; font-size: 13px; }
+  .kit-tokens summary { cursor: pointer; color: var(--txt-secondary); }
+  .kit-grupo { margin-top: 10px; }
+  .kit-grupo-n { display: block; font-size: 12px; font-weight: 500; color: var(--txt-tertiary); margin-bottom: 6px; }
+  .kit-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .kit-card .kit-token { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-card); }
+  .kit-card .kit-falta { border-color: #b3261e; color: #8c1d18; background: #fdecea; }
+  .kit-vacio { max-width: 560px; padding: 28px; border: 1px dashed var(--border); border-radius: var(--r-card); background: var(--surface-card); }
+  .kit-vacio h2 { font-size: 17px; font-weight: 600; margin: 0 0 8px; color: var(--txt-primary); }
+  .kit-vacio p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--txt-secondary); }
+</style>
