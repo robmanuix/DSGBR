@@ -24,8 +24,36 @@ export const PAGINAS_FINAL: string[] = [SEP, '🔨 Herramientas'];
 
 export type Plataforma = 'web' | 'ios' | 'android';
 
+// ---------- Perfiles: cuánto del maestro se conserva en el archivo de cada cliente ----------
+export type Perfil = 'completo' | 'estandar' | 'minimo';
+export const PERFIL_TEXTO: Record<Perfil, string> = {
+  completo: 'Completo: todo el maestro, sin quitar nada.',
+  estandar: 'Estándar: quita las páginas vacías (Pictogramas, Ilustraciones) y los íconos sin uso.',
+  minimo: 'Mínimo: solo Color y Tipografía en Fundamentos, 8 componentes por plataforma y los íconos que usan. Sin separadores ni Activos de marca.',
+};
+const VACIAS = ['↳ Pictogramas', '↳ Ilustraciones'];
+const DOCS_MINIMO = ['↳ Activos de marca', '↳ Color para datos', '↳ Espaciado', '↳ Retícula', '↳ Bordes', '↳ Elevación', '↳ Movimiento', '↳ Accesibilidad'];
+const COMP_MINIMO = ['Botón', 'Botón de ícono', 'Campo de texto', 'Texto de ayuda', 'Casilla', 'Opción', 'Interruptor', 'Alerta'];
+
+/** Páginas que el perfil no conserva (sin contar los separadores, que el perfil Mínimo quita aparte). */
+export function paginasFueraDePerfil(perfil: Perfil): string[] {
+  if (perfil === 'completo') return [];
+  const fuera = [...VACIAS];
+  if (perfil === 'minimo') {
+    fuera.push(...DOCS_MINIMO);
+    for (const [grupo, sufijo] of [['web', 'Web'], ['app', 'App']] as const) {
+      for (const p of paginasDeGrupo(grupo)) {
+        if (!p.startsWith('↳ ')) continue; // las páginas índice («🖥️ Componentes Web») se conservan
+        const base = p.replace(/^↳ /, '').replace(new RegExp(' · ' + sufijo + '$'), '');
+        if (!COMP_MINIMO.includes(base)) fuera.push(p);
+      }
+    }
+  }
+  return fuera;
+}
+
 /** Lista ordenada de páginas que debe tener el archivo según lo que eligió el usuario. */
-export function paginasRequeridas(plataformas: Plataforma[], extras: string[]): string[] {
+export function paginasRequeridas(plataformas: Plataforma[], extras: string[], perfil: Perfil = 'completo'): string[] {
   const lista = [...PAGINAS_BASE];
   // Las páginas adicionales van al final de Brief y marca (antes del separador de Fundamentos).
   const iFund = lista.indexOf('🌈 Fundamentos');
@@ -33,7 +61,8 @@ export function paginasRequeridas(plataformas: Plataforma[], extras: string[]): 
   if (plataformas.includes('web')) lista.push(...PAGINAS_WEB);
   if (plataformas.includes('ios') || plataformas.includes('android')) lista.push(...PAGINAS_APP);
   lista.push(...PAGINAS_FINAL);
-  return lista;
+  const fuera = new Set(paginasFueraDePerfil(perfil));
+  return lista.filter((p) => !fuera.has(p) && !(perfil === 'minimo' && p === SEP));
 }
 
 /** Páginas del maestro que pertenecen a una plataforma no elegida. */

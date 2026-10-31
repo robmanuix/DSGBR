@@ -1,6 +1,6 @@
 import { exportarTodo, type VarModelo, type EstiloTexto, type EstiloEfecto } from '../../tokens-engine/src/exportar';
 import { auditarRoles, BASES, brandRamp, checkContrast, checkExtra, contrast, type AuditoriaPar, EXTRA_ROLES, espacioParaBase, sintaxisPrimitivo, sintaxisRolExtra, STEPS, type BaseId, type Sintaxis } from '../../tokens-engine/src/index';
-import { paginasDeGrupo, paginasRequeridas, SEP, type Plataforma } from './estructura';
+import { paginasDeGrupo, paginasFueraDePerfil, paginasRequeridas, SEP, type Perfil, type Plataforma } from './estructura';
 
 figma.showUI(__html__, { width: 380, height: 620, title: 'DS Generate by Robman Digital' });
 
@@ -14,6 +14,7 @@ interface Entrada {
   plataformas: Plataforma[];
   extras: string[];
   quitarSobrantes: boolean;
+  perfil?: Perfil;
   tipografia?: string;
   brief?: Brief;
   versionDS?: string;
@@ -370,7 +371,8 @@ async function aplicar(e: Entrada) {
   const estado = await verificarMaestro();
   if (!estado.esMaestro) throw new Error('Este archivo no parece un maestro DSGBR. Faltan: ' + estado.faltan.join(', '));
 
-  const requeridas = paginasRequeridas(e.plataformas, e.extras);
+  const perfil: Perfil = e.perfil === 'minimo' || e.perfil === 'estandar' ? e.perfil : 'completo';
+  const requeridas = paginasRequeridas(e.plataformas, e.extras, perfil);
   const creadas = await crearPaginas(requeridas);
 
   let quitadas: string[] = [];
@@ -381,20 +383,69 @@ async function aplicar(e: Entrada) {
     quitadas = await quitarPaginas(sobran);
   }
 
+  const poda = perfil !== 'completo' ? await aplicarPerfil(perfil) : null;
+
   const { escritas, nuevas } = await aplicarPaleta(e.colores);
   const rolesNuevos = await aplicarRolesExtra(e.colores);
   const baseAplicada = await aplicarBase(e.base);
   const fuente = e.tipografia && e.tipografia.trim() ? await aplicarTipografia(e.tipografia.trim()) : null;
   await rellenarPortada(e);
   const briefRes = await rellenarBrief(e);
-  figma.root.setPluginData('dsgbr.marca', JSON.stringify({ ...e, plugin: '0.10.0' }));
+  figma.root.setPluginData('dsgbr.marca', JSON.stringify({ ...e, perfil, plugin: '0.11.0' }));
   return {
-    escritas, nuevas, creadas, quitadas, fuente, rolesNuevos, baseAplicada, briefRes, auditoria: await auditarContraste(),
+    escritas, nuevas, creadas, quitadas, poda, fuente, rolesNuevos, baseAplicada, briefRes, auditoria: await auditarContraste(),
     contraste: {
       claro: [...checkContrast(e.colores[0].hex, 'claro'), ...e.colores.slice(1).flatMap((c) => checkExtra(c.nombre, c.hex, 'claro'))],
       oscuro: [...checkContrast(e.colores[0].hex, 'oscuro'), ...e.colores.slice(1).flatMap((c) => checkExtra(c.nombre, c.hex, 'oscuro'))],
     },
   };
+}
+
+
+// ---------- Perfiles: recortar el archivo del cliente ----------
+/** Quita del archivo lo que el perfil no conserva. Nunca quita una página cuyos componentes use otra página que se queda. */
+async function aplicarPerfil(perfil: Perfil) {
+  await figma.loadAllPagesAsync();
+  const portada = figma.root.children.find((p) => p.name === '👋 Portada') || figma.root.children[0];
+  await figma.setCurrentPageAsync(portada);
+  const nombres = new Set(paginasFueraDePerfil(perfil));
+  const candidatas = figma.root.children.filter((p) => nombres.has(p.name) || (perfil === 'minimo' && p.name === SEP));
+  const ids = new Set(candidatas.map((p) => p.id));
+  // Componentes que viven en las páginas candidatas.
+  const comps = new Set<string>();
+  for (const p of candidatas) for (const n of p.findAllWithCriteria({ types: ['COMPONENT', 'COMPONENT_SET'] })) comps.add(n.id);
+  const protegidas = new Set<string>();
+  if (comps.size) {
+    for (const p of figma.root.children) {
+      if (ids.has(p.id)) continue;
+      for (const inst of p.findAllWithCriteria({ types: ['INSTANCE'] })) {
+        const m = await inst.getMainComponentAsync();
+        if (!m) continue;
+        const dueño = m.parent && m.parent.type === 'COMPONENT_SET' ? m.parent : m;
+        if (comps.has(m.id) || comps.has(dueño.id)) {
+          // Averigua a qué página candidata pertenece ese componente.
+          let n: BaseNode | null = dueño;
+          while (n && n.parent && n.parent.type !== 'DOCUMENT') n = n.parent;
+          if (n && ids.has(n.id)) protegidas.add(n.id);
+        }
+      }
+    }
+  }
+  const quitadas: string[] = [];
+  for (const p of candidatas) {
+    if (protegidas.has(p.id)) continue;
+    quitadas.push(p.name);
+    p.remove();
+  }
+  let coleccion = false;
+  if (perfil === 'minimo' && quitadas.includes('↳ Color para datos')) {
+    for (const col of await figma.variables.getLocalVariableCollectionsAsync()) {
+      if (col.name === 'Semánticos: Color para datos') { col.remove(); coleccion = true; }
+    }
+  }
+  let iconos = 0;
+  try { iconos = (await podarIconos(true)).quitados; } catch (_) { /* sin página de íconos: nada que quitar */ }
+  return { perfil, paginas: quitadas.length, protegidas: candidatas.filter((p) => protegidas.has(p.id)).map((p) => p.name), coleccion, iconos };
 }
 
 // ---------- Auditoría de contraste sobre los roles reales del archivo ----------
@@ -512,6 +563,62 @@ async function exportarComponentes() {
   return { manifiesto, imagenes };
 }
 
+
+// ---------- Íconos sin uso (aligerar el archivo de cada cliente) ----------
+const PAGINA_ICONOS = '↳ Íconos';
+
+/** Calcula qué conjuntos `Ícono/…` de la página Íconos no usa ningún componente ni página. `quitar` los elimina. Mantiene todo lo dudoso. */
+async function podarIconos(quitar: boolean) {
+  const pagIconos = figma.root.children.find((p) => p.name === PAGINA_ICONOS);
+  if (!pagIconos) throw new Error('No encuentro la página «' + PAGINA_ICONOS + '».');
+  await figma.loadAllPagesAsync();
+  const esIcono = (n: BaseNode | null): n is ComponentSetNode => !!n && n.type === 'COMPONENT_SET' && n.name.indexOf('Ícono/') === 0;
+  const aSet = (n: BaseNode | null): ComponentSetNode | null => {
+    if (!n) return null;
+    if (esIcono(n)) return n;
+    if (n.type === 'COMPONENT' && esIcono(n.parent)) return n.parent as ComponentSetNode;
+    return null;
+  };
+  const usados = new Set<string>();
+  const marcar = async (id: unknown) => {
+    if (typeof id !== 'string') return;
+    const s = aSet(await figma.getNodeByIdAsync(id));
+    if (s) usados.add(s.id);
+  };
+  for (const pagina of figma.root.children) {
+    if (pagina === pagIconos) continue;
+    for (const inst of pagina.findAllWithCriteria({ types: ['INSTANCE'] })) {
+      const m = await inst.getMainComponentAsync();
+      const s = aSet(m);
+      if (s) usados.add(s.id);
+      for (const k of Object.keys(inst.componentProperties)) {
+        const p = inst.componentProperties[k];
+        if (p.type === 'INSTANCE_SWAP') await marcar(p.value);
+      }
+    }
+    // Valores por defecto y preferidos de las propiedades de intercambio de los componentes.
+    for (const comp of pagina.findAllWithCriteria({ types: ['COMPONENT_SET', 'COMPONENT'] })) {
+      if (comp.type === 'COMPONENT' && comp.parent && comp.parent.type === 'COMPONENT_SET') continue;
+      const defs = comp.componentPropertyDefinitions;
+      for (const k of Object.keys(defs)) {
+        const d: any = defs[k];
+        if (d.type !== 'INSTANCE_SWAP') continue;
+        await marcar(d.defaultValue);
+        for (const pv of d.preferredValues || []) await marcar(pv.key);
+      }
+    }
+  }
+  if (usados.size === 0) throw new Error('No encontré ningún ícono en uso; no quito nada por seguridad.');
+  const todos = pagIconos.findAllWithCriteria({ types: ['COMPONENT_SET'] }).filter((s) => s.name.indexOf('Ícono/') === 0);
+  const sinUso = todos.filter((s) => !usados.has(s.id));
+  const nombres = sinUso.map((s) => s.name.replace('Ícono/', ''));
+  if (quitar) {
+    for (const s of sinUso) s.remove();
+    figma.root.setPluginData('dsgbr.iconosQuitados', String(nombres.length));
+  }
+  return { total: todos.length, enUso: usados.size, sinUso: nombres.length, quitados: quitar ? nombres.length : 0, muestra: nombres.slice(0, 12) };
+}
+
 figma.ui.onmessage = async (msg: { tipo: string; datos?: Entrada }) => {
   try {
     if (msg.tipo === 'verificar') {
@@ -526,6 +633,8 @@ figma.ui.onmessage = async (msg: { tipo: string; datos?: Entrada }) => {
       figma.ui.postMessage({ tipo: 'corregido', ...(await corregirContraste()) });
     } else if (msg.tipo === 'exportarComponentes') {
       figma.ui.postMessage({ tipo: 'componentes', ...(await exportarComponentes()) });
+    } else if (msg.tipo === 'iconos') {
+      figma.ui.postMessage({ tipo: 'iconos', ...(await podarIconos(!!(msg as any).quitar)) });
     } else if (msg.tipo === 'cargar') {
       const guardado = figma.root.getPluginData('dsgbr.marca');
       figma.ui.postMessage({ tipo: 'guardado', datos: guardado ? JSON.parse(guardado) : null });

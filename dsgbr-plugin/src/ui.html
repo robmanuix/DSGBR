@@ -132,6 +132,9 @@
   <textarea id="extras" placeholder="Voz y tono&#10;Fotografía"></textarea>
   <div class="nota">Se crean dentro de «Brief y marca». Las páginas estándar que falten también se crean.</div>
 
+  <label for="perfil">Perfil del archivo</label>
+  <select id="perfil"><option value="completo">Completo</option><option value="estandar">Estándar</option><option value="minimo">Mínimo</option></select>
+  <div class="nota" id="perfil-nota" style="margin-top:4px"></div>
   <label class="opciones" style="font-weight:400"><input type="checkbox" id="quitar"> Quitar las páginas de las plataformas no elegidas</label>
 
   <div class="fila">
@@ -145,13 +148,19 @@
     <div class="fila"><button id="aa-ver" type="button">Auditar</button><button id="aa-fix" class="p" type="button">Corregir</button></div>
     <div id="aa-res" style="margin-top:8px"></div>
   </details>
+  <details class="ia" id="ico" style="margin-top:12px">
+    <summary>Íconos sin uso</summary>
+    <div class="nota" style="margin-top:6px">El maestro trae 266 íconos y los componentes usan pocos. «Ver» cuenta cuáles no usa ningún componente ni página; «Quitar» los elimina de este archivo para aligerarlo. Hazlo solo en el duplicado del cliente, nunca en el maestro.</div>
+    <div class="fila"><button id="ico-ver" type="button">Ver</button><button id="ico-fix" type="button" disabled>Quitar los sin uso</button></div>
+    <div id="ico-res" style="margin-top:8px"></div>
+  </details>
   <details class="ia" id="gh" style="margin-top:12px">
     <summary>Publicar DocSite en GitHub</summary>
     <div class="nota" style="margin-top:6px">Genera los archivos, crea el repositorio del cliente desde tu plantilla y los sube en un solo commit con la etiqueta de la versión. El token se guarda solo en este equipo.</div>
     <label for="gh-owner">Usuario u organización de destino</label>
     <input id="gh-owner" type="text" placeholder="robmanuix">
     <label for="gh-plantilla">Repositorio plantilla (usuario/repositorio)</label>
-    <input id="gh-plantilla" type="text" placeholder="robmanuix/dsgbr-docsite-template">
+    <input id="gh-plantilla" type="text" placeholder="robmanuix/DSGBR-docsite-template">
     <label for="gh-repo">Nombre del repositorio del cliente</label>
     <input id="gh-repo" type="text" placeholder="ds-proyecto-flash">
     <label class="opciones" style="font-weight:400"><input type="checkbox" id="gh-privado" checked> Repositorio privado</label>
@@ -198,6 +207,11 @@
   const leerBrief = () => { const b = {}; BRIEF.forEach((k) => { const v = $('b-' + k).value.trim(); if (v) b[k] = v; }); return b; };
   const ponerBrief = (b) => { BRIEF.forEach((k) => { if (b && b[k]) $('b-' + k).value = b[k]; }); };
   const listaAA = (f) => f.map((p) => '• ' + p.rol + ' sobre ' + p.sobre + ' (' + (p.modo === 'claro' ? 'Claro' : 'Oscuro') + '): ' + p.ratio + ':1, mínimo ' + p.minimo + ':1').join('\n');
+  const PERFIL_TXT = { completo: 'Todo el maestro, sin quitar nada.', estandar: 'Quita las páginas vacías (Pictogramas, Ilustraciones) y los íconos sin uso.', minimo: 'Solo Color y Tipografía en Fundamentos, 8 componentes por plataforma y los íconos que usan; sin separadores. Úsalo solo en el duplicado del cliente.' };
+  $('perfil').onchange = () => { $('perfil-nota').textContent = PERFIL_TXT[$('perfil').value]; };
+  $('perfil').onchange();
+  $('ico-ver').onclick = () => { $('ico-res').textContent = 'Revisando los íconos (puede tardar)…'; $('ico-fix').disabled = true; enviar({ tipo: 'iconos', quitar: false }); };
+  $('ico-fix').onclick = () => { $('ico-res').textContent = 'Quitando…'; $('ico-fix').disabled = true; enviar({ tipo: 'iconos', quitar: true }); };
   $('aa-ver').onclick = () => { $('aa-res').textContent = 'Auditando…'; enviar({ tipo: 'auditar' }); };
   $('aa-fix').onclick = () => { $('aa-res').textContent = 'Corrigiendo…'; enviar({ tipo: 'corregirContraste' }); };
   const subir = (t) => { const p = ($('versionDS').value.trim() || '1.0.0').split('.').map(Number); if (p.length !== 3 || p.some(isNaN)) return; if (t === 'M') p.splice(0, 3, p[0] + 1, 0, 0); else if (t === 'm') p.splice(1, 2, p[1] + 1, 0); else p[2]++; $('versionDS').value = p.join('.'); };
@@ -208,7 +222,7 @@
     enviar({ tipo: 'aplicar', datos: {
       cliente: $('cliente').value.trim(), colores: leerColores(), base: $('base').value, plataformas,
       extras: $('extras').value.split('\n').map((s) => s.trim()).filter(Boolean),
-      quitarSobrantes: $('quitar').checked, tipografia: $('tipografia').value.trim(), brief: leerBrief(), versionDS: $('versionDS').value.trim(),
+      quitarSobrantes: $('quitar').checked, perfil: $('perfil').value, tipografia: $('tipografia').value.trim(), brief: leerBrief(), versionDS: $('versionDS').value.trim(),
     } });
   };
   onmessage = (e) => {
@@ -219,7 +233,7 @@
         : '<span class="mal">No es un maestro DSGBR.</span> Faltan: ' + m.faltan.join(', ');
     }
     if (m.tipo === 'exportado') { ARCHIVOS = m.archivos; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaA = false; ghIntentar(); } }
-    if (m.tipo === 'gh') { if (m.cfg) { $('gh-owner').value = m.cfg.owner || ''; $('gh-plantilla').value = m.cfg.plantilla || ''; if (typeof m.cfg.privado === 'boolean') $('gh-privado').checked = m.cfg.privado; } if (m.token) $('gh-token').value = m.token; if (!$('gh-owner').value) $('gh-owner').value = 'robmanuix'; if (!$('gh-plantilla').value) $('gh-plantilla').value = 'robmanuix/dsgbr-docsite-template'; }
+    if (m.tipo === 'gh') { if (m.cfg) { $('gh-owner').value = m.cfg.owner || ''; $('gh-plantilla').value = m.cfg.plantilla || ''; if (typeof m.cfg.privado === 'boolean') $('gh-privado').checked = m.cfg.privado; } if (m.token) $('gh-token').value = m.token; if (!$('gh-owner').value) $('gh-owner').value = 'robmanuix'; if (!$('gh-plantilla').value) $('gh-plantilla').value = 'robmanuix/DSGBR-docsite-template'; }
     if (m.tipo === 'componentes') { IMAGENES = [{ nombre: 'componentes.json', contenido: m.manifiesto }, ...m.imagenes.map((i) => ({ nombre: i.nombre, bytes: new Uint8Array(i.bytes) }))]; pintarArchivos(); if (GH_PEND) { GH_PEND.faltaI = false; ghIntentar(); } }
     if (m.tipo === 'clave' && m.clave) { $('ia-clave').value = m.clave; }
     if (m.tipo === 'fuentes') {
@@ -230,6 +244,7 @@
       $('aplicar').textContent = 'Guardar y actualizar';
       if (m.datos.tipografia) $('tipografia').value = m.datos.tipografia;
       ponerBrief(m.datos.brief);
+      if (m.datos.perfil) { $('perfil').value = m.datos.perfil; $('perfil').onchange(); }
       if (m.datos.versionDS) $('versionDS').value = m.datos.versionDS;
       $('cliente').value = m.datos.cliente; $('base').value = m.datos.base; $('base').onchange(); $('colores').innerHTML = ''; (m.datos.colores || [{ nombre: 'Brand', hex: m.datos.hex }]).forEach((c) => agregar(c.nombre, c.hex));
       ['web', 'ios', 'android'].forEach((p) => { $('p-' + p).checked = m.datos.plataformas.includes(p); });
@@ -241,8 +256,13 @@
       $('salida').innerHTML = m.escritas + ' variables de color escritas (' + m.nuevas + ' nuevas).<br>' +
         m.creadas.length + ' páginas creadas' + (m.creadas.length ? ': ' + m.creadas.join(', ') : '') + '.<br>' +
         (m.quitadas.length ? m.quitadas.length + ' páginas quitadas.<br>' : '') +
+        (m.poda ? 'Perfil «' + m.poda.perfil + '»: ' + m.poda.paginas + ' páginas quitadas, ' + m.poda.iconos + ' íconos sin uso' + (m.poda.coleccion ? ', colección Color para datos' : '') + '.' + (m.poda.protegidas.length ? ' Conservadas por dependencia: ' + m.poda.protegidas.join(', ') + '.' : '') + '<br>' : '') +
         'Base «' + m.baseAplicada.base + '» aplicada (' + m.baseAplicada.cambios + ' valores: forma, espaciado, elevación, movimiento).<br>' + (m.auditoria && m.auditoria.fallos.length ? '<span class="mal">' + m.auditoria.fallos.length + ' pares reales sin AA: abre «Contraste de los roles».</span><br>' : '') + (m.briefRes ? m.briefRes.campos + ' campos de Brief y marca escritos.<br>' : '') + (m.rolesNuevos ? m.rolesNuevos + ' roles semánticos nuevos para los colores adicionales.<br>' : '') + (m.fuente ? 'Tipografía: ' + m.fuente.familia + ' (' + m.fuente.regular + ' / ' + m.fuente.seminegrita + ').<br>' : '') +
         (f.length ? '<span class="mal">' + f.length + ' pares sin contraste AA</span>' : '<span class="ok">Todos los pares cumplen AA (claro y oscuro)</span>');
+    }
+    if (m.tipo === 'iconos') {
+      $('ico-res').textContent = m.quitados ? ('Listo: se quitaron ' + m.quitados + ' íconos sin uso. Quedan ' + m.enUso + '.') : (m.sinUso + ' de ' + m.total + ' íconos no se usan (' + m.enUso + ' en uso). Ej.: ' + m.muestra.join(', ') + (m.sinUso > m.muestra.length ? '…' : ''));
+      $('ico-fix').disabled = !(m.sinUso > 0 && !m.quitados);
     }
     if (m.tipo === 'auditoria') {
       $('aa').open = true;
@@ -256,6 +276,7 @@
         (m.restantes.length ? '\n\n<span class="mal">Siguen sin cumplir ' + m.restantes.length + ' (revísalos a mano):</span>\n' + listaAA(m.restantes) : '\n\n<span class="ok">Todos los pares cumplen AA.</span>');
     }
     if (m.tipo === 'error' && GH_PEND) { GH_PEND = null; $('gh-publicar').disabled = false; $('gh-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; return; }
+    if (m.tipo === 'error' && /^(Revisando|Quitando)/.test($('ico-res').textContent)) { $('ico-res').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; return; }
     if (m.tipo === 'error') { $('exp-lista').textContent = ''; $('salida').innerHTML = '<span class="mal">' + m.mensaje + '</span>'; }
   };
 
