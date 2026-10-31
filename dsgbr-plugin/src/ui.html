@@ -515,7 +515,7 @@
     });
     const t = document.createElement('div'); t.className = 'fila';
     t.innerHTML = '<button type="button" class="p">Descargar todo (.zip)</button>';
-    t.firstChild.onclick = () => descargarZip(ARCHIVOS.concat(IMAGENES), 'dsgbr-entrada.zip');
+    t.firstChild.onclick = () => { const d = new Date(), z = (n) => String(n).padStart(2, '0'); descargarZip(ARCHIVOS.concat(IMAGENES), 'dsgbr-entrada-' + d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + '.zip'); };
     cont.appendChild(t);
   };
 

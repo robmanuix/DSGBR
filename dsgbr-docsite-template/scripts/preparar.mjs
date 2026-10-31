@@ -37,7 +37,8 @@ const destinos = {
   'componentes.json': 'tokens/componentes.json', 'DSTokens.swift': 'build/ios/DSTokens.swift', 'DsTokens.kt': 'build/android/DsTokens.kt',
 };
 if (existsSync('entrada')) {
-  for (const z of readdirSync('entrada').filter((f) => f.toLowerCase().endsWith('.zip'))) {
+  // Del más antiguo al más reciente (por fecha del archivo): el último en abrirse gana.
+  for (const z of readdirSync('entrada').filter((f) => f.toLowerCase().endsWith('.zip')).sort((a, b) => statSync(`entrada/${a}`).mtimeMs - statSync(`entrada/${b}`).mtimeMs)) {
     console.log('Abriendo entrada/' + z);
     descomprimir(`entrada/${z}`, 'entrada/.contenido');
   }
