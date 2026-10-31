@@ -73,6 +73,9 @@
   <label for="versionDS">Versión del sistema</label>
   <div class="fila" style="margin-top:0"><input id="versionDS" type="text" placeholder="1.0.0" style="flex:1"><button id="v-p" type="button" title="Parche: correcciones">+ parche</button><button id="v-m" type="button" title="Menor: cambios compatibles">+ menor</button><button id="v-M" type="button" title="Mayor: cambios que rompen">+ mayor</button></div>
   <div class="nota">Aparece en el DocSite y en el Resumen. Se guarda en el archivo; sube la versión cada vez que publiques cambios.</div>
+  <label for="notas">Notas de esta versión (opcional)</label>
+  <textarea id="notas" rows="2" placeholder="Qué cambió, en una o dos frases"></textarea>
+  <div class="nota">Aparecen en la página «Historial» del DocSite. Se usan en la próxima publicación y luego se vacían.</div>
 
   <label>Colores de marca</label>
   <div id="colores"></div>
@@ -560,7 +563,8 @@
       const cfg = (() => { try { return JSON.parse(ARCHIVOS.find((a) => a.nombre === 'docsite.config.json').contenido); } catch (e) { return {}; } })();
       const version = cfg.version || '1.0.0';
       const archivos = ARCHIVOS.concat(IMAGENES).map((a) => ({ ruta: 'entrada/' + a.nombre, contenido: a.contenido, bytes: a.bytes }));
-      const r = await publicarGitHub(Object.assign({}, p.datos, { archivos, version, mensaje: 'DocSite v' + version + ': ' + (cfg.cliente || p.datos.repo), descripcion: 'Design system de ' + (cfg.cliente || p.datos.repo), progreso: (t) => { out.textContent = t; } }));
+      const r = await publicarGitHub(Object.assign({}, p.datos, { archivos, version, mensaje: 'DocSite v' + version + ': ' + (cfg.cliente || p.datos.repo) + (p.notas ? '\n\n' + p.notas : ''), descripcion: 'Design system de ' + (cfg.cliente || p.datos.repo), progreso: (t) => { out.textContent = t; } }));
+      $('notas').value = '';
       out.innerHTML = '<span class="ok">Publicado.</span>\n' + (r.creado ? 'Repositorio creado: ' : 'Repositorio actualizado: ') + r.url + '\n' + r.archivos + ' archivos en un commit · etiqueta ' + r.etiqueta + '\nGitHub Pages: ' + r.pages + '\nSitio (tarda un par de minutos en compilar): ' + r.sitio;
     } catch (e) { out.innerHTML = '<span class="mal">' + (e.message || e) + '</span>'; }
     btn.disabled = false;
@@ -574,7 +578,7 @@
     if (datos.plantilla && !/^[^/\s]+\/[^/\s]+$/.test(datos.plantilla)) { out.innerHTML = '<span class="mal">La plantilla debe escribirse como usuario/repositorio.</span>'; return; }
     enviar($('gh-recordar').checked ? { tipo: 'guardarGh', token: datos.token, cfg: { owner: datos.owner, plantilla: datos.plantilla, privado: datos.privado } } : { tipo: 'guardarGh', cfg: { owner: datos.owner, plantilla: datos.plantilla, privado: datos.privado }, borrarToken: true });
     $('gh-publicar').disabled = true; out.textContent = 'Generando archivos e imágenes de componentes…';
-    GH_PEND = { datos, faltaA: true, faltaI: true };
+    GH_PEND = { datos, faltaA: true, faltaI: true, notas: ($('notas').value || '').trim() };
     enviar({ tipo: 'exportar' }); enviar({ tipo: 'exportarComponentes' });
   };
 

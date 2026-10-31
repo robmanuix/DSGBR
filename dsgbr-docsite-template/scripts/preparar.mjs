@@ -3,6 +3,7 @@
 // 2) Si el repositorio aún no tiene tokens/tokens.json, usa la muestra.
 // 3) Copia los archivos descargables a public/descargas.
 import { cpSync, existsSync, mkdirSync, copyFileSync, readdirSync, readFileSync, writeFileSync, rmSync, statSync } from 'node:fs';
+import { generarHistorial } from './historial.mjs';
 import { inflateRawSync } from 'node:zlib';
 
 // Lector de ZIP mínimo (métodos «almacenado» y «deflate»): abre el .zip que descarga el plugin sin dependencias.
@@ -82,3 +83,4 @@ for (const dir of ['web', 'ios', 'android']) {
   for (const f of readdirSync(`build/${dir}`)) copyFileSync(`build/${dir}/${f}`, `public/descargas/${f}`);
 }
 console.log('Descargas listas en public/descargas');
+console.log(`Historial: ${generarHistorial()} versiones publicadas`);

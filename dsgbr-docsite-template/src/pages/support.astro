@@ -7,6 +7,10 @@ const indice = existsSync('tokens/componentes.json') ? JSON.parse(readFileSync('
 const comps: any[] = indice?.componentes ?? [];
 const nVariantes = comps.reduce((t, c) => t + (c.variantes ?? 0), 0);
 
+const subNav = [
+  { label: 'Support us', href: '/support', id: 'support' },
+  { label: 'Historial', href: '/historial', id: 'historial' },
+];
 const cliente = config.cliente ?? 'tu marca';
 const familia = String(resolver(todos.find((t) => t.nombre === 'Familia/Marca') ?? ({ valor: '', modos: {}, modoBase: 'Valor' } as any)) || '');
 const pares = paresContraste();
@@ -14,7 +18,7 @@ const cumplen = pares.filter((p) => p.cumple).length;
 const modos = todos.some((t) => t.coleccion === 'Semánticos: Color' && Object.keys(t.modos ?? {}).length > 1) ? 'Claro · Oscuro' : 'Claro';
 const generado = String(config.generado ?? '').slice(0, 10);
 ---
-<Layout title="Support us" section="support" pageTitle="Support us" pageDesc="Recursos y contacto del equipo de diseño.">
+<Layout title="Support us" section="support" subNav={subNav} pageTitle="Support us" pageDesc="Recursos y contacto del equipo de diseño.">
 
   <div style="max-width:640px">
     <div class="support-hero">
