@@ -79,15 +79,15 @@ const cssCode = `.field { display: flex; flex-direction: column; gap: 6px; }
         <div class="prop-inline">
           <span class="prop-label">Etiqueta</span>
           <label class="ctrl-toggle">
-            <input type="checkbox" id="p-label-show" checked />
+            <input type="checkbox" id="p-label-show" aria-label="Mostrar etiqueta" checked />
             <span class="ctrl-track"></span>
           </label>
         </div>
-        <input class="prop-input" id="p-label" type="text" value="Correo electrónico" />
+        <input class="prop-input" id="p-label" type="text" value="Correo electrónico" aria-label="Texto de la etiqueta" />
       </div>
 
       <div class="prop-group">
-        <span class="prop-label">Placeholder</span>
+        <label class="prop-label" for="p-placeholder">Placeholder</label>
         <input class="prop-input" id="p-placeholder" type="text" value="usuario@email.com" />
       </div>
 
@@ -127,11 +127,11 @@ const cssCode = `.field { display: flex; flex-direction: column; gap: 6px; }
         <div class="prop-inline">
           <span class="prop-label">Texto de ayuda</span>
           <label class="ctrl-toggle">
-            <input type="checkbox" id="p-hint-show" />
+            <input type="checkbox" id="p-hint-show" aria-label="Mostrar texto de ayuda" />
             <span class="ctrl-track"></span>
           </label>
         </div>
-        <input class="prop-input" id="p-hint" type="text" value="Ingresa un correo válido." />
+        <input class="prop-input" id="p-hint" type="text" value="Ingresa un correo válido." aria-label="Texto de ayuda" />
       </div>
     </div>
 
